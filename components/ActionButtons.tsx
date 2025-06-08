@@ -1,62 +1,54 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Dimensions,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { LogIn, LogOut } from 'lucide-react-native';
 
 interface ActionButtonsProps {
-  onClockIn: () => void;
-  onClockOut: () => void;
-  disabled?: boolean;
-  loading?: boolean;
+  onCheckIn: () => void;
+  onCheckOut: () => void;
+  isDisabled: boolean;
+  isLoading: boolean;
+  loadingAction: 'checkin' | 'checkout' | null;
 }
 
-const { width } = Dimensions.get('window');
-
-export default function ActionButtons({
-  onClockIn,
-  onClockOut,
-  disabled = false,
-  loading = false,
+export default function ActionButtons({ 
+  onCheckIn, 
+  onCheckOut, 
+  isDisabled, 
+  isLoading, 
+  loadingAction 
 }: ActionButtonsProps) {
-  const buttonWidth = Math.min((width - 60) / 2, 180);
-
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[
-          styles.button,
-          styles.clockInButton,
-          { width: buttonWidth },
-          disabled && styles.buttonDisabled,
-        ]}
-        onPress={onClockIn}
-        disabled={disabled || loading}
+        style={[styles.button, styles.checkInButton, isDisabled && styles.disabledButton]}
+        onPress={onCheckIn}
+        disabled={isDisabled || isLoading}
+        activeOpacity={0.8}
       >
-        <LogIn size={24} color="#FFFFFF" />
-        <Text style={styles.buttonText}>
-          {loading ? 'Processing...' : 'Clock In'}
-        </Text>
+        {isLoading && loadingAction === 'checkin' ? (
+          <ActivityIndicator size="small\" color="#ffffff" />
+        ) : (
+          <>
+            <LogIn size={24} color="#ffffff" />
+            <Text style={styles.buttonText}>Check In</Text>
+          </>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[
-          styles.button,
-          styles.clockOutButton,
-          { width: buttonWidth },
-          disabled && styles.buttonDisabled,
-        ]}
-        onPress={onClockOut}
-        disabled={disabled || loading}
+        style={[styles.button, styles.checkOutButton, isDisabled && styles.disabledButton]}
+        onPress={onCheckOut}
+        disabled={isDisabled || isLoading}
+        activeOpacity={0.8}
       >
-        <LogOut size={24} color="#FFFFFF" />
-        <Text style={styles.buttonText}>
-          {loading ? 'Processing...' : 'Clock Out'}
-        </Text>
+        {isLoading && loadingAction === 'checkout' ? (
+          <ActivityIndicator size="small\" color="#ffffff" />
+        ) : (
+          <>
+            <LogOut size={24} color="#ffffff" />
+            <Text style={styles.buttonText}>Check Out</Text>
+          </>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -65,36 +57,33 @@ export default function ActionButtons({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     gap: 16,
-    paddingHorizontal: 20,
+    marginTop: 24,
   },
   button: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 16,
+    paddingHorizontal: 24,
     borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 6,
     gap: 8,
+    minHeight: 56,
   },
-  clockInButton: {
-    backgroundColor: '#059669',
+  checkInButton: {
+    backgroundColor: '#10b981',
   },
-  clockOutButton: {
-    backgroundColor: '#DC2626',
+  checkOutButton: {
+    backgroundColor: '#ef4444',
   },
-  buttonDisabled: {
+  disabledButton: {
+    backgroundColor: '#9ca3af',
     opacity: 0.6,
   },
   buttonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
-    color: '#FFFFFF',
   },
 });

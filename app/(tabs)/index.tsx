@@ -1,171 +1,189 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  Dimensions,
-  RefreshControl,
-} from 'react-native';
-import { Staff } from '@/types/api';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import { Staff, TimeLogRequest } from '@/types/api';
 import { apiService } from '@/services/api';
-import StaffPicker from '@/components/StaffPicker';
-import PinInput from '@/components/PinInput';
+import StaffGrid from '@/components/StaffGrid';
+import PinKeypad from '@/components/PinKeypad';
 import ActionButtons from '@/components/ActionButtons';
-import StatusMessage from '@/components/StatusMessage';
+import FeedbackMessage from '@/components/FeedbackMessage';
 
-const { width, height } = Dimensions.get('window');
-
-export default function TimeClockScreen() {
+export default function AttendanceScreen() {
   const [staff, setStaff] = useState<Staff[]>([]);
-  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
   const [pin, setPin] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [statusMessage, setStatusMessage] = useState<{
-    message: string;
-    type: 'success' | 'error' | 'info';
+  const [isLoading, setIsLoading] = useState(false);
+  const [isStaffLoading, setIsStaffLoading] = useState(true);
+  const [loadingAction, setLoadingAction] = useState<'checkin' | 'checkout' | null>(null);
+  const [feedback, setFeedback] = useState<{
     visible: boolean;
+    message: string;
+    type: 'success' | 'error';
   }>({
-    message: '',
-    type: 'info',
     visible: false,
+    message: '',
+    type: 'success',
   });
 
-  const fetchStaff = async () => {
+  useEffect(() => {
+    loadStaff();
+  }, []);
+
+  const loadStaff = async () => {
     try {
-      const staffData = await apiService.getStaff();
+      setIsStaffLoading(true);
+      const staffData = await apiService.getStaffList();
       setStaff(staffData);
     } catch (error) {
-      showStatusMessage('Failed to load staff list', 'error');
+      showFeedback('Failed to load staff list. Please try again.', 'error');
+    } finally {
+      setIsStaffLoading(false);
     }
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await fetchStaff();
-    setRefreshing(false);
+  const handleNumberPress = (number: string) => {
+    if (pin.length < 9) {
+      setPin(prev => prev + number);
+    }
   };
 
-  useEffect(() => {
-    fetchStaff();
-  }, []);
-
-  const showStatusMessage = (message: string, type: 'success' | 'error' | 'info') => {
-    setStatusMessage({ message, type, visible: true });
+  const handleBackspace = () => {
+    setPin(prev => prev.slice(0, -1));
   };
 
-  const hideStatusMessage = () => {
-    setStatusMessage(prev => ({ ...prev, visible: false }));
-  };
-
-  const resetForm = () => {
-    setSelectedStaff(null);
+  const handleClear = () => {
     setPin('');
   };
 
-  const handleClockIn = async () => {
-    if (!selectedStaff || !pin) {
-      showStatusMessage('Please select staff and enter PIN', 'error');
-      return;
-    }
+  const showFeedback = (message: string, type: 'success' | 'error') => {
+    setFeedback({ visible: true, message, type });
+  };
 
-    setLoading(true);
+  const hideFeedback = () => {
+    setFeedback(prev => ({ ...prev, visible: false }));
+  };
+
+  const isFormValid = selectedStaffId !== null && pin.length >= 1 && pin.length <= 9;
+
+  const handleCheckIn = async () => {
+    if (!isFormValid || !selectedStaffId) return;
+
     try {
-      const result = await apiService.clockIn({
-        UserID: selectedStaff.ID,
+      setIsLoading(true);
+      setLoadingAction('checkin');
+      
+      const request: TimeLogRequest = {
+        UserID: selectedStaffId,
         pin,
         datetime: new Date().toISOString(),
-      });
+      };
 
-      if (result) {
-        showStatusMessage(`${selectedStaff.Name} clocked in successfully`, 'success');
+      const response = await apiService.checkIn(request);
+      
+      if (response.success) {
+        showFeedback('Check-in successful!', 'success');
         resetForm();
       } else {
-        showStatusMessage('Clock in failed. Please check your PIN.', 'error');
+        showFeedback(response.message || 'Check-in failed. Please try again.', 'error');
       }
     } catch (error) {
-      showStatusMessage('Clock in failed. Please try again.', 'error');
+      showFeedback(
+        error instanceof Error ? error.message : 'Network error. Please check your connection.',
+        'error'
+      );
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+      setLoadingAction(null);
     }
   };
 
-  const handleClockOut = async () => {
-    if (!selectedStaff || !pin) {
-      showStatusMessage('Please select staff and enter PIN', 'error');
-      return;
-    }
+  const handleCheckOut = async () => {
+    if (!isFormValid || !selectedStaffId) return;
 
-    setLoading(true);
     try {
-      const result = await apiService.clockOut({
-        UserID: selectedStaff.ID,
+      setIsLoading(true);
+      setLoadingAction('checkout');
+      
+      const request: TimeLogRequest = {
+        UserID: selectedStaffId,
         pin,
         datetime: new Date().toISOString(),
-      });
+      };
 
-      if (result) {
-        showStatusMessage(`${selectedStaff.Name} clocked out successfully`, 'success');
+      const response = await apiService.checkOut(request);
+      
+      if (response.success) {
+        showFeedback('Check-out successful!', 'success');
         resetForm();
       } else {
-        showStatusMessage('Clock out failed. Please check your PIN.', 'error');
+        showFeedback(response.message || 'Check-out failed. Please try again.', 'error');
       }
     } catch (error) {
-      showStatusMessage('Clock out failed. Please try again.', 'error');
+      showFeedback(
+        error instanceof Error ? error.message : 'Network error. Please check your connection.',
+        'error'
+      );
     } finally {
-      setLoading(false);
+      setIsLoading(false);
+      setLoadingAction(null);
     }
   };
 
-  const isFormValid = selectedStaff && pin.length > 0;
+  const resetForm = () => {
+    setSelectedStaffId(null);
+    setPin('');
+  };
+
+  const selectedStaffName = staff.find(s => s.id === selectedStaffId)?.name || '';
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusMessage
-        message={statusMessage.message}
-        type={statusMessage.type}
-        visible={statusMessage.visible}
-        onHide={hideStatusMessage}
+      <FeedbackMessage
+        message={feedback.message}
+        type={feedback.type}
+        visible={feedback.visible}
+        onDismiss={hideFeedback}
       />
       
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
+        showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Staff Time Clock</Text>
-          <Text style={styles.subtitle}>Select your name and enter your PIN</Text>
+          <Text style={styles.title}>Staff Attendance</Text>
+          <Text style={styles.subtitle}>Select staff member, enter PIN, and choose action</Text>
         </View>
 
-        <View style={styles.form}>
-          <StaffPicker
-            staff={staff}
-            selectedStaff={selectedStaff}
-            onSelect={setSelectedStaff}
-            disabled={loading}
-          />
-
-          <PinInput
-            pin={pin}
-            onPinChange={setPin}
-            disabled={loading}
-          />
-        </View>
-      </ScrollView>
-
-      <View style={styles.actionContainer}>
-        <ActionButtons
-          onClockIn={handleClockIn}
-          onClockOut={handleClockOut}
-          disabled={!isFormValid}
-          loading={loading}
+        <StaffGrid
+          staff={staff}
+          selectedId={selectedStaffId}
+          onSelect={setSelectedStaffId}
+          isLoading={isStaffLoading}
         />
-      </View>
+
+        {selectedStaffName && (
+          <View style={styles.selectedStaffContainer}>
+            <Text style={styles.selectedStaffText}>
+              Selected: {selectedStaffName}
+            </Text>
+          </View>
+        )}
+
+        <PinKeypad
+          pin={pin}
+          onNumberPress={handleNumberPress}
+          onBackspace={handleBackspace}
+          onClear={handleClear}
+        />
+
+        <ActionButtons
+          onCheckIn={handleCheckIn}
+          onCheckOut={handleCheckOut}
+          isDisabled={!isFormValid}
+          isLoading={isLoading}
+          loadingAction={loadingAction}
+        />
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -173,41 +191,43 @@ export default function TimeClockScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#ffffff',
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    padding: 24,
+    paddingBottom: 48,
   },
   header: {
-    alignItems: 'center',
     marginBottom: 32,
+    alignItems: 'center',
   },
   title: {
-    fontSize: Math.min(width * 0.08, 32),
+    fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
-    textAlign: 'center',
+    color: '#1f2937',
     marginBottom: 8,
   },
   subtitle: {
-    fontSize: Math.min(width * 0.04, 16),
-    color: '#6B7280',
+    fontSize: 16,
+    color: '#6b7280',
     textAlign: 'center',
+    lineHeight: 24,
   },
-  form: {
-    flex: 1,
-    justifyContent: 'center',
-    minHeight: height * 0.5,
+  selectedStaffContainer: {
+    backgroundColor: '#dbeafe',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 24,
+    borderLeftWidth: 4,
+    borderLeftColor: '#3b82f6',
   },
-  actionContainer: {
-    paddingVertical: 20,
-    backgroundColor: '#FFFFFF',
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
+  selectedStaffText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1d4ed8',
+    textAlign: 'center',
   },
 });

@@ -1,42 +1,25 @@
 import { Tabs } from 'expo-router';
-import { Clock, User } from 'lucide-react-native';
+import { Clock } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: '#9CA3AF',
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopWidth: 1,
-          borderTopColor: '#E5E7EB',
-          paddingBottom: 8,
-          paddingTop: 8,
-          height: 60,
+          backgroundColor: '#ffffff',
+          borderTopColor: '#e5e7eb',
         },
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '500',
-        },
+        tabBarActiveTintColor: '#3b82f6',
+        tabBarInactiveTintColor: '#6b7280',
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Time Clock',
+          title: 'Attendance',
           tabBarIcon: ({ size, color }) => (
             <Clock size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ size, color }) => (
-            <User size={size} color={color} />
           ),
         }}
       />

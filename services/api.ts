@@ -1,62 +1,69 @@
-import { Staff, TimeLogRequest, TimeLogResponse } from '@/types/api';
+import { Staff, TimeLogRequest, ApiResponse, StaffResponse } from '@/types/api';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://api.example.com';
 
-export const apiService = {
-  async getStaff(): Promise<Staff[]> {
+class ApiService {
+  private async makeRequest<T>(
+    endpoint: string,
+    options: RequestInit = {}
+  ): Promise<T> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/user/staff/`);
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        ...options,
+      });
+
       if (!response.ok) {
-        throw new Error('Failed to fetch staff');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
       return await response.json();
     } catch (error) {
-      console.error('Error fetching staff:', error);
-      throw error;
-    }
-  },
-
-  async clockIn(data: TimeLogRequest): Promise<boolean> {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/timelog/pinon`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to clock in');
+      if (error instanceof Error) {
+        throw new Error(`Network error: ${error.message}`);
       }
-      
-      const result = await response.json();
-      return result;
-    } catch (error) {
-      console.error('Error clocking in:', error);
-      throw error;
+      throw new Error('Unknown network error occurred');
     }
-  },
+  }
 
-  async clockOut(data: TimeLogRequest): Promise<boolean> {
+  async getStaffList(): Promise<Staff[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/timelog/pinout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to clock out');
+      const response = await this.makeRequest<StaffResponse>('/api/user/staff/');
+      if (response.success && response.data) {
+        return response.data;
       }
-      
-      const result = await response.json();
-      return result;
+      throw new Error(response.message || 'Failed to fetch staff list');
     } catch (error) {
-      console.error('Error clocking out:', error);
       throw error;
     }
-  },
-};
+  }
+
+  async checkIn(request: TimeLogRequest): Promise<ApiResponse> {
+    try {
+      const response = await this.makeRequest<ApiResponse>('/api/timelog/pinon', {
+        method: 'POST',
+        body: JSON.stringify(request),
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async checkOut(request: TimeLogRequest): Promise<ApiResponse> {
+    try {
+      const response = await this.makeRequest<ApiResponse>('/api/timelog/pinout', {
+        method: 'POST',
+        body: JSON.stringify(request),
+      });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
+export const apiService = new ApiService();
