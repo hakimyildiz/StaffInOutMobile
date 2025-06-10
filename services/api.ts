@@ -1,6 +1,6 @@
 import { Staff, TimeLogRequest, ApiResponse, StaffResponse } from '@/types/api';
 
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.103:5000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://api.piwick.com';
 
 class ApiService {
   private async makeRequest<T>(
