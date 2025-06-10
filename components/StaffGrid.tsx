@@ -5,7 +5,7 @@ import { Staff } from '@/types/api';
 interface StaffGridProps {
   staff: Staff[];
   selectedId: number | null;
-  onSelect: (id: number) => void;
+  onSelect: (ID: number) => void;
   isLoading: boolean;
 }
 
@@ -30,23 +30,23 @@ export default function StaffGrid({ staff, selectedId, onSelect, isLoading }: St
       <View style={styles.grid}>
         {staff.map((member) => (
           <TouchableOpacity
-            key={member.id}
+            key={member.ID}
             style={[
               styles.staffItem,
               { width: itemWidth },
-              selectedId === member.id && styles.selectedItem,
+              selectedId === member.ID && styles.selectedItem,
             ]}
-            onPress={() => onSelect(member.id)}
+            onPress={() => onSelect(member.ID)}
             activeOpacity={0.7}
           >
             <Text
               style={[
                 styles.staffName,
-                selectedId === member.id && styles.selectedText,
+                selectedId === member.ID && styles.selectedText,
               ]}
               numberOfLines={2}
             >
-              {member.name}
+              {member.FirstName} {member.LastName}
             </Text>
           </TouchableOpacity>
         ))}

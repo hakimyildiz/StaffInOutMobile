@@ -10,7 +10,7 @@ import FeedbackMessage from '@/components/FeedbackMessage';
 export default function AttendanceScreen() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [selectedStaffId, setSelectedStaffId] = useState<number | null>(null);
-  const [pin, setPin] = useState('');
+  const [PinCode, setPinCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isStaffLoading, setIsStaffLoading] = useState(true);
   const [loadingAction, setLoadingAction] = useState<'checkin' | 'checkout' | null>(null);
@@ -41,17 +41,17 @@ export default function AttendanceScreen() {
   };
 
   const handleNumberPress = (number: string) => {
-    if (pin.length < 9) {
-      setPin(prev => prev + number);
+    if (PinCode.length < 9) {
+      setPinCode(prev => prev + number);
     }
   };
 
   const handleBackspace = () => {
-    setPin(prev => prev.slice(0, -1));
+    setPinCode(prev => prev.slice(0, -1));
   };
 
   const handleClear = () => {
-    setPin('');
+    setPinCode('');
   };
 
   const showFeedback = (message: string, type: 'success' | 'error') => {
@@ -62,7 +62,7 @@ export default function AttendanceScreen() {
     setFeedback(prev => ({ ...prev, visible: false }));
   };
 
-  const isFormValid = selectedStaffId !== null && pin.length >= 1 && pin.length <= 9;
+  const isFormValid = selectedStaffId !== null && PinCode.length >= 1 && PinCode.length <= 9;
 
   const handleCheckIn = async () => {
     if (!isFormValid || !selectedStaffId) return;
@@ -73,8 +73,7 @@ export default function AttendanceScreen() {
       
       const request: TimeLogRequest = {
         UserID: selectedStaffId,
-        pin,
-        datetime: new Date().toISOString(),
+        PinCode: PinCode
       };
 
       const response = await apiService.checkIn(request);
@@ -105,8 +104,7 @@ export default function AttendanceScreen() {
       
       const request: TimeLogRequest = {
         UserID: selectedStaffId,
-        pin,
-        datetime: new Date().toISOString(),
+        PinCode: PinCode
       };
 
       const response = await apiService.checkOut(request);
@@ -130,10 +128,10 @@ export default function AttendanceScreen() {
 
   const resetForm = () => {
     setSelectedStaffId(null);
-    setPin('');
+    setPinCode('');
   };
 
-  const selectedStaffName = staff.find(s => s.id === selectedStaffId)?.name || '';
+  const selectedStaffName = staff.find(s => s.ID === selectedStaffId)?.FirstName + ' ' + staff.find(s => s.ID === selectedStaffId)?.LastName;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -170,7 +168,7 @@ export default function AttendanceScreen() {
         )}
 
         <PinKeypad
-          pin={pin}
+          PinCode={PinCode}
           onNumberPress={handleNumberPress}
           onBackspace={handleBackspace}
           onClear={handleClear}

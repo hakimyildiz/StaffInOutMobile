@@ -3,13 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { Backpack as Backspace } from 'lucide-react-native';
 
 interface PinKeypadProps {
-  pin: string;
+  PinCode: string;
   onNumberPress: (number: string) => void;
   onBackspace: () => void;
   onClear: () => void;
 }
 
-export default function PinKeypad({ pin, onNumberPress, onBackspace, onClear }: PinKeypadProps) {
+export default function PinKeypad({ PinCode, onNumberPress, onBackspace, onClear }: PinKeypadProps) {
   const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   return (
@@ -18,9 +18,9 @@ export default function PinKeypad({ pin, onNumberPress, onBackspace, onClear }: 
       
       <View style={styles.pinDisplay}>
         <Text style={styles.pinText}>
-          {pin.replace(/./g, '●')}
+          {PinCode.replace(/./g, '●')}
         </Text>
-        {pin.length === 0 && (
+        {PinCode.length === 0 && (
           <Text style={styles.placeholder}>Enter 1-9 digits</Text>
         )}
       </View>
@@ -57,9 +57,9 @@ export default function PinKeypad({ pin, onNumberPress, onBackspace, onClear }: 
           style={styles.actionButton}
           onPress={onBackspace}
           activeOpacity={0.7}
-          disabled={pin.length === 0}
+          disabled={PinCode.length === 0}
         >
-          <Backspace size={24} color={pin.length === 0 ? '#9ca3af' : '#374151'} />
+          <Backspace size={24} color={PinCode.length === 0 ? '#9ca3af' : '#374151'} />
         </TouchableOpacity>
       </View>
     </View>

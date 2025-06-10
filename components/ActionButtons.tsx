@@ -26,7 +26,7 @@ export default function ActionButtons({
         activeOpacity={0.8}
       >
         {isLoading && loadingAction === 'checkin' ? (
-          <ActivityIndicator size="small\" color="#ffffff" />
+          <ActivityIndicator size="small" color="#ffffff" />
         ) : (
           <>
             <LogIn size={24} color="#ffffff" />
@@ -42,7 +42,7 @@ export default function ActionButtons({
         activeOpacity={0.8}
       >
         {isLoading && loadingAction === 'checkout' ? (
-          <ActivityIndicator size="small\" color="#ffffff" />
+          <ActivityIndicator size="small" color="#ffffff" />
         ) : (
           <>
             <LogOut size={24} color="#ffffff" />

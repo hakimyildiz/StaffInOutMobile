@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "EXPO_NO_TELEMETRY=1 expo start",
+    "dev": "cross-env EXPO_NO_TELEMETRY=1 expo start --dev-client",
+    "start": "cross-env EXPO_NO_TELEMETRY=1 expo start",
+    "android": "cross-env EXPO_NO_TELEMETRY=1 expo start --dev-client --android",
+    "dev1": "EXPO_NO_TELEMETRY=1 expo start",
     "build:web": "expo export --platform web",
     "lint": "expo lint"
   },
@@ -38,11 +41,13 @@
     "react-native-svg": "15.11.2",
     "react-native-url-polyfill": "^2.0.0",
     "react-native-web": "^0.20.0",
-    "react-native-webview": "13.13.5"
+    "react-native-webview": "13.13.5",
+    "expo-dev-client": "~5.2.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
     "@types/react": "~19.0.10",
+    "cross-env": "^7.0.3",
     "typescript": "~5.8.3"
   }
 }

@@ -1,12 +1,12 @@
 export interface Staff {
-  id: number;
-  name: string;
+  ID: number;
+  FirstName: string;
+  LastName: string;
 }
 
 export interface TimeLogRequest {
   UserID: number;
-  pin: string;
-  datetime: string;
+  PinCode: string;
 }
 
 export interface ApiResponse {
@@ -18,4 +18,5 @@ export interface StaffResponse {
   data: Staff[];
   success: boolean;
   message?: string;
+  count?: number;
 }
