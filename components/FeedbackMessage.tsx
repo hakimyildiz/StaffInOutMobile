@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
-import { CheckCircle, XCircle } from 'lucide-react-native';
+import { CircleCheck as CheckCircle, Circle as XCircle } from 'lucide-react-native';
 
 interface FeedbackMessageProps {
   message: string;
