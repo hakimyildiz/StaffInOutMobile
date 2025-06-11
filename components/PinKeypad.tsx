@@ -1,27 +1,45 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Backpack as Backspace } from 'lucide-react-native';
+import { Delete } from 'lucide-react-native';
 
 interface PinKeypadProps {
-  PinCode: string;
+  pinCode: string;
   onNumberPress: (number: string) => void;
   onBackspace: () => void;
   onClear: () => void;
+  maxLength?: number;
 }
 
-export default function PinKeypad({ PinCode, onNumberPress, onBackspace, onClear }: PinKeypadProps) {
+export default function PinKeypad({ 
+  pinCode, 
+  onNumberPress, 
+  onBackspace, 
+  onClear, 
+  maxLength = 9 
+}: PinKeypadProps) {
   const numbers = ['1', '2', '3', '4', '5', '6', '7', '8', '9'];
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Enter PIN</Text>
-      
       <View style={styles.pinDisplay}>
-        <Text style={styles.pinText}>
-          {PinCode.replace(/./g, '●')}
-        </Text>
-        {PinCode.length === 0 && (
-          <Text style={styles.placeholder}>Enter 1-9 digits</Text>
+        <View style={styles.pinDots}>
+          {Array.from({ length: maxLength }, (_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.pinDot,
+                index < pinCode.length && styles.filledDot,
+              ]}
+            />
+          ))}
+        </View>
+        {pinCode.length === 0 && (
+          <Text style={styles.placeholder}>Enter your {maxLength}-digit PIN</Text>
+        )}
+        {pinCode.length > 0 && (
+          <Text style={styles.pinLength}>
+            {pinCode.length} of {maxLength} digits entered
+          </Text>
         )}
       </View>
 
@@ -31,6 +49,7 @@ export default function PinKeypad({ PinCode, onNumberPress, onBackspace, onClear
             key={number}
             style={styles.numberButton}
             onPress={() => onNumberPress(number)}
+            disabled={pinCode.length >= maxLength}
             activeOpacity={0.7}
           >
             <Text style={styles.numberText}>{number}</Text>
@@ -48,18 +67,19 @@ export default function PinKeypad({ PinCode, onNumberPress, onBackspace, onClear
         <TouchableOpacity
           style={styles.numberButton}
           onPress={() => onNumberPress('0')}
+          disabled={pinCode.length >= maxLength}
           activeOpacity={0.7}
         >
           <Text style={styles.numberText}>0</Text>
         </TouchableOpacity>
         
         <TouchableOpacity
-          style={styles.actionButton}
+          style={[styles.actionButton, pinCode.length === 0 && styles.disabledButton]}
           onPress={onBackspace}
           activeOpacity={0.7}
-          disabled={PinCode.length === 0}
+          disabled={pinCode.length === 0}
         >
-          <Backspace size={24} color={PinCode.length === 0 ? '#9ca3af' : '#374151'} />
+          <Delete size={20} color={pinCode.length === 0 ? '#cbd5e1' : '#475569'} />
         </TouchableOpacity>
       </View>
     </View>
@@ -68,49 +88,14 @@ export default function PinKeypad({ PinCode, onNumberPress, onBackspace, onClear
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: 32,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1f2937',
-    marginBottom: 16,
-    textAlign: 'center',
+    alignItems: 'center',
   },
   pinDisplay: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    padding: 20,
-    marginBottom: 24,
-    minHeight: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: '#e2e8f0',
-  },
-  pinText: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1f2937',
-    letterSpacing: 8,
-    minHeight: 28,
-  },
-  placeholder: {
-    fontSize: 14,
-    color: '#9ca3af',
-    position: 'absolute',
-  },
-  keypad: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  numberButton: {
-    width: '30%',
-    height: 60,
     backgroundColor: '#ffffff',
-    borderRadius: 12,
+    borderRadius: 16,
+    padding: 24,
+    marginBottom: 24,
+    minHeight: 100,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
@@ -121,24 +106,76 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
+  pinDots: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 8,
+  },
+  pinDot: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#f1f5f9',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+  },
+  filledDot: {
+    backgroundColor: '#3b82f6',
+    borderColor: '#3b82f6',
+  },
+  placeholder: {
+    fontSize: 14,
+    color: '#94a3b8',
+    textAlign: 'center',
+  },
+  pinLength: {
+    fontSize: 12,
+    color: '#64748b',
+    textAlign: 'center',
+  },
+  keypad: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: 12,
+    maxWidth: 240,
+  },
+  numberButton: {
+    width: 64,
+    height: 64,
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: '#e2e8f0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
   numberText: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '600',
-    color: '#1f2937',
+    color: '#1e293b',
   },
   actionButton: {
-    width: '30%',
-    height: 60,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
+    width: 64,
+    height: 64,
+    backgroundColor: '#f8fafc',
+    borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 2,
     borderColor: '#e2e8f0',
   },
+  disabledButton: {
+    opacity: 0.5,
+  },
   actionText: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
-    color: '#374151',
+    color: '#475569',
   },
 });

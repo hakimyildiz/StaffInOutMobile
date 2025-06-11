@@ -20,3 +20,16 @@ export interface StaffResponse {
   message?: string;
   count?: number;
 }
+
+export interface TimeLog {
+  checkIn: string;
+  checkOut?: string;
+  staffName?: string;
+  duration?: string;
+}
+
+export interface TimeLogResponse {
+  data: TimeLog[];
+  success: boolean;
+  message?: string;
+}
