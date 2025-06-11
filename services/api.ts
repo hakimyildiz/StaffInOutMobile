@@ -72,22 +72,32 @@ class ApiService {
         {
           checkIn: '2024-01-15T09:00:00Z',
           checkOut: '2024-01-15T17:30:00Z',
+          Action: 'checkout',
+          Timestamp: '2024-01-15T17:30:00Z',
         },
         {
           checkIn: '2024-01-14T08:45:00Z',
           checkOut: '2024-01-14T17:15:00Z',
+          Action: 'checkout',
+          Timestamp: '2024-01-14T17:15:00Z',
         },
         {
           checkIn: '2024-01-13T09:15:00Z',
           checkOut: '2024-01-13T17:45:00Z',
+          Action: 'checkout',
+          Timestamp: '2024-01-13T17:45:00Z',
         },
         {
           checkIn: '2024-01-12T08:30:00Z',
           checkOut: '2024-01-12T17:00:00Z',
+          Action: 'checkout',
+          Timestamp: '2024-01-12T17:00:00Z',
         },
         {
           checkIn: '2024-01-11T09:00:00Z',
           // No checkout - still in progress
+          Action: 'checkin',
+          Timestamp: '2024-01-11T09:00:00Z',
         },
       ];
 

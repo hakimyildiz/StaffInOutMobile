@@ -26,6 +26,8 @@ export interface TimeLog {
   checkOut?: string;
   staffName?: string;
   duration?: string;
+  Action: 'checkin' | 'checkout';
+  Timestamp: string;
 }
 
 export interface TimeLogResponse {
