@@ -1,123 +1,103 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Check, User, Lock, Clock } from 'lucide-react-native';
 
 interface StepIndicatorProps {
   currentStep: number;
+  totalSteps?: number;
 }
 
-export default function StepIndicator({ currentStep }: StepIndicatorProps) {
-  const steps = [
-    { number: 1, title: 'Select Staff', icon: User },
-    { number: 2, title: 'Enter PIN', icon: Lock },
-    { number: 3, title: 'Choose Action', icon: Clock },
-  ];
-
+export default function StepIndicator({ currentStep, totalSteps = 3 }: StepIndicatorProps) {
   return (
     <View style={styles.container}>
-      {steps.map((step, index) => {
-        const isCompleted = currentStep > step.number;
-        const isActive = currentStep === step.number;
-        const IconComponent = step.icon;
-
-        return (
-          <React.Fragment key={step.number}>
-            <View style={styles.stepWrapper}>
-              <View
-                style={[
-                  styles.stepCircle,
-                  isCompleted && styles.completedCircle,
-                  isActive && styles.activeCircle,
-                ]}
-              >
-                {isCompleted ? (
-                  <Check size={16} color="#ffffff" strokeWidth={3} />
-                ) : (
-                  <IconComponent
-                    size={16}
-                    color={isActive ? '#ffffff' : '#94a3b8'}
-                    strokeWidth={2}
-                  />
-                )}
+      <View style={styles.stepsContainer}>
+        {Array.from({ length: totalSteps }, (_, index) => {
+          const stepNumber = index + 1;
+          const isActive = stepNumber === currentStep;
+          const isCompleted = stepNumber < currentStep;
+          
+          return (
+            <React.Fragment key={stepNumber}>
+              <View style={[
+                styles.step,
+                isActive && styles.activeStep,
+                isCompleted && styles.completedStep
+              ]}>
+                <Text style={[
+                  styles.stepText,
+                  isActive && styles.activeStepText,
+                  isCompleted && styles.completedStepText
+                ]}>
+                  {stepNumber}
+                </Text>
               </View>
-              <Text
-                style={[
-                  styles.stepTitle,
-                  isCompleted && styles.completedTitle,
-                  isActive && styles.activeTitle,
-                ]}
-              >
-                {step.title}
-              </Text>
-            </View>
-            {index < steps.length - 1 && (
-              <View
-                style={[
+              {stepNumber < totalSteps && (
+                <View style={[
                   styles.connector,
-                  isCompleted && styles.completedConnector,
-                ]}
-              />
-            )}
-          </React.Fragment>
-        );
-      })}
+                  isCompleted && styles.completedConnector
+                ]} />
+              )}
+            </React.Fragment>
+          );
+        })}
+      </View>
+      <Text style={styles.stepLabel}>
+        Step {currentStep} of {totalSteps}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  stepsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 12,
+  },
+  step: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#e2e8f0',
     justifyContent: 'center',
-    marginBottom: 32,
-    paddingHorizontal: 20,
-  },
-  stepWrapper: {
     alignItems: 'center',
-    flex: 1,
-  },
-  stepCircle: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#f1f5f9',
     borderWidth: 2,
     borderColor: '#e2e8f0',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
   },
-  activeCircle: {
+  activeStep: {
     backgroundColor: '#3b82f6',
     borderColor: '#3b82f6',
   },
-  completedCircle: {
+  completedStep: {
     backgroundColor: '#10b981',
     borderColor: '#10b981',
   },
-  stepTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#94a3b8',
-    textAlign: 'center',
-  },
-  activeTitle: {
-    color: '#3b82f6',
+  stepText: {
+    fontSize: 14,
     fontWeight: '600',
+    color: '#64748b',
   },
-  completedTitle: {
-    color: '#10b981',
-    fontWeight: '600',
+  activeStepText: {
+    color: '#ffffff',
+  },
+  completedStepText: {
+    color: '#ffffff',
   },
   connector: {
+    width: 24,
     height: 2,
     backgroundColor: '#e2e8f0',
-    flex: 1,
-    marginHorizontal: 8,
-    marginBottom: 24,
+    marginHorizontal: 4,
   },
   completedConnector: {
     backgroundColor: '#10b981',
+  },
+  stepLabel: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#64748b',
   },
 });
