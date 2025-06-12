@@ -1,5 +1,29 @@
 import React, { useState } from 'react';
-import { Users, AlertCircle, ChevronRight, Clock, Coffee, CheckCircle, Settings, Moon, Sun, Server, X } from 'lucide-react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Modal,
+  TextInput,
+  Switch,
+  SafeAreaView,
+  StatusBar,
+} from 'react-native';
+import {
+  Users,
+  AlertCircle,
+  ChevronRight,
+  Clock,
+  Coffee,
+  CheckCircle,
+  Settings,
+  Moon,
+  Sun,
+  Server,
+  X,
+} from 'lucide-react-native';
 import type { Staff, StaffStatus, Theme } from '../App';
 
 interface StaffSelectionProps {
@@ -28,78 +52,70 @@ const getStatusConfig = (status: StaffStatus, theme: Theme) => {
   switch (status) {
     case 'available':
       return {
-        bgColor: isDark 
-          ? 'bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-blue-600' 
-          : 'bg-gray-50 hover:bg-blue-50 border-gray-200 hover:border-blue-200',
-        textColor: isDark 
-          ? 'text-gray-100 group-hover:text-blue-400' 
-          : 'text-gray-900 group-hover:text-blue-700',
-        statusBg: isDark ? 'bg-green-900/50' : 'bg-green-100',
-        statusText: isDark ? 'text-green-400' : 'text-green-700',
+        backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+        borderColor: isDark ? '#374151' : '#e5e7eb',
+        textColor: isDark ? '#f3f4f6' : '#111827',
+        statusBg: isDark ? '#064e3b' : '#dcfce7',
+        statusText: isDark ? '#34d399' : '#15803d',
         statusIcon: CheckCircle,
         statusLabel: 'Available'
       };
     case 'on-shift':
       return {
-        bgColor: isDark 
-          ? 'bg-blue-900/30 hover:bg-blue-800/40 border-blue-800 hover:border-blue-600' 
-          : 'bg-blue-50 hover:bg-blue-100 border-blue-200 hover:border-blue-300',
-        textColor: isDark ? 'text-blue-300' : 'text-blue-900',
-        statusBg: isDark ? 'bg-blue-900/50' : 'bg-blue-100',
-        statusText: isDark ? 'text-blue-400' : 'text-blue-700',
+        backgroundColor: isDark ? '#1e3a8a' : '#dbeafe',
+        borderColor: isDark ? '#3b82f6' : '#93c5fd',
+        textColor: isDark ? '#93c5fd' : '#1e3a8a',
+        statusBg: isDark ? '#1e3a8a' : '#dbeafe',
+        statusText: isDark ? '#60a5fa' : '#1d4ed8',
         statusIcon: Clock,
         statusLabel: 'On Shift'
       };
     case 'on-break':
       return {
-        bgColor: isDark 
-          ? 'bg-yellow-900/30 hover:bg-yellow-800/40 border-yellow-800 hover:border-yellow-600' 
-          : 'bg-yellow-50 hover:bg-yellow-100 border-yellow-200 hover:border-yellow-300',
-        textColor: isDark ? 'text-yellow-300' : 'text-yellow-900',
-        statusBg: isDark ? 'bg-yellow-900/50' : 'bg-yellow-100',
-        statusText: isDark ? 'text-yellow-400' : 'text-yellow-700',
+        backgroundColor: isDark ? '#92400e' : '#fef3c7',
+        borderColor: isDark ? '#f59e0b' : '#fbbf24',
+        textColor: isDark ? '#fbbf24' : '#92400e',
+        statusBg: isDark ? '#92400e' : '#fef3c7',
+        statusText: isDark ? '#fbbf24' : '#b45309',
         statusIcon: Coffee,
         statusLabel: 'On Break'
       };
     case 'shift-ended':
       return {
-        bgColor: isDark 
-          ? 'bg-green-900/30 hover:bg-green-800/40 border-green-800 hover:border-green-600' 
-          : 'bg-green-50 hover:bg-green-100 border-green-200 hover:border-green-300',
-        textColor: isDark ? 'text-green-300' : 'text-green-900',
-        statusBg: isDark ? 'bg-green-900/50' : 'bg-green-100',
-        statusText: isDark ? 'text-green-400' : 'text-green-700',
+        backgroundColor: isDark ? '#064e3b' : '#dcfce7',
+        borderColor: isDark ? '#10b981' : '#34d399',
+        textColor: isDark ? '#34d399' : '#064e3b',
+        statusBg: isDark ? '#064e3b' : '#dcfce7',
+        statusText: isDark ? '#34d399' : '#059669',
         statusIcon: CheckCircle,
         statusLabel: 'Shift Ended'
       };
     default:
       return {
-        bgColor: isDark 
-          ? 'bg-gray-800 hover:bg-gray-700 border-gray-700 hover:border-blue-600' 
-          : 'bg-gray-50 hover:bg-blue-50 border-gray-200 hover:border-blue-200',
-        textColor: isDark 
-          ? 'text-gray-100 group-hover:text-blue-400' 
-          : 'text-gray-900 group-hover:text-blue-700',
-        statusBg: isDark ? 'bg-gray-700' : 'bg-gray-100',
-        statusText: isDark ? 'text-gray-400' : 'text-gray-700',
+        backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+        borderColor: isDark ? '#374151' : '#e5e7eb',
+        textColor: isDark ? '#f3f4f6' : '#111827',
+        statusBg: isDark ? '#374151' : '#f3f4f6',
+        statusText: isDark ? '#9ca3af' : '#374151',
         statusIcon: CheckCircle,
         statusLabel: 'Available'
       };
   }
 };
 
-const StaffSelection: React.FC<StaffSelectionProps> = ({ 
-  onStaffSelect, 
-  staffStatuses, 
-  theme, 
-  onThemeToggle, 
-  apiServer, 
-  onApiServerChange 
+const StaffSelection: React.FC<StaffSelectionProps> = ({
+  onStaffSelect,
+  staffStatuses,
+  theme,
+  onThemeToggle,
+  apiServer,
+  onApiServerChange,
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [tempApiServer, setTempApiServer] = useState(apiServer);
 
   const isDark = theme === 'dark';
+  const styles = createStyles(isDark);
 
   const handleSaveSettings = () => {
     onApiServerChange(tempApiServer);
@@ -112,240 +128,482 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className={`rounded-2xl shadow-2xl p-8 w-full max-w-2xl transition-colors ${
-        isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
-      }`}>
-        {/* Header with Settings */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="text-center flex-1">
-            <div className="flex items-center justify-center mb-4">
-              <div className={`p-3 rounded-full ${isDark ? 'bg-blue-900/50' : 'bg-blue-100'}`}>
-                <Users className={`h-8 w-8 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
-              </div>
-            </div>
-            <h1 className={`text-3xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Staff Selection
-            </h1>
-            <p className={isDark ? 'text-gray-300' : 'text-gray-600'}>
-              Please select your name from the list below to continue
-            </p>
-          </div>
-          
-          {/* Settings Button */}
-          <button
-            onClick={() => setShowSettings(true)}
-            className={`p-2 rounded-lg transition-colors ${
-              isDark 
-                ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-            }`}
-          >
-            <Settings className="h-6 w-6" />
-          </button>
-        </div>
+    <SafeAreaView style={styles.container}>
+      <StatusBar
+        barStyle={isDark ? 'light-content' : 'dark-content'}
+        backgroundColor={isDark ? '#111827' : '#ffffff'}
+      />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.mainCard}>
+          {/* Header with Settings */}
+          <View style={styles.header}>
+            <View style={styles.headerContent}>
+              <View style={styles.iconContainer}>
+                <Users size={32} color={isDark ? '#60a5fa' : '#2563eb'} />
+              </View>
+              <Text style={styles.title}>Staff Selection</Text>
+              <Text style={styles.subtitle}>
+                Please select your name from the list below to continue
+              </Text>
+            </View>
+            
+            <TouchableOpacity
+              onPress={() => setShowSettings(true)}
+              style={styles.settingsButton}
+            >
+              <Settings size={24} color={isDark ? '#9ca3af' : '#6b7280'} />
+            </TouchableOpacity>
+          </View>
 
-        <div className="space-y-3 mb-8">
-          {mockStaff.map((staff) => {
-            const status = staffStatuses[staff.id] || 'available';
-            const config = getStatusConfig(status, theme);
-            const StatusIcon = config.statusIcon;
+          {/* Staff List */}
+          <View style={styles.staffList}>
+            {mockStaff.map((staff) => {
+              const status = staffStatuses[staff.id] || 'available';
+              const config = getStatusConfig(status, theme);
+              const StatusIcon = config.statusIcon;
 
-            return (
-              <button
-                key={staff.id}
-                onClick={() => onStaffSelect(staff)}
-                className={`w-full flex items-center justify-between p-4 ${config.bgColor} rounded-xl transition-all duration-200 border group`}
-              >
-                <div className="flex items-center space-x-4">
-                  <span className={`font-medium ${config.textColor}`}>
-                    {staff.name}
-                  </span>
-                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${config.statusBg}`}>
-                    <StatusIcon className={`h-3 w-3 ${config.statusText}`} />
-                    <span className={`text-xs font-medium ${config.statusText}`}>
-                      {config.statusLabel}
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className={`h-5 w-5 transition-colors ${
-                  isDark 
-                    ? 'text-gray-500 group-hover:text-blue-400' 
-                    : 'text-gray-400 group-hover:text-blue-600'
-                }`} />
-              </button>
-            );
-          })}
-        </div>
-
-        <div className={`border rounded-xl p-4 ${
-          isDark 
-            ? 'bg-amber-900/20 border-amber-800' 
-            : 'bg-amber-50 border-amber-200'
-        }`}>
-          <div className="flex items-start space-x-3">
-            <AlertCircle className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
-              isDark ? 'text-amber-400' : 'text-amber-600'
-            }`} />
-            <div>
-              <h3 className={`font-semibold mb-1 ${
-                isDark ? 'text-amber-300' : 'text-amber-800'
-              }`}>
-                Name Not Listed?
-              </h3>
-              <p className={`text-sm ${
-                isDark ? 'text-amber-200' : 'text-amber-700'
-              }`}>
-                If your name is not listed above, please contact your supervisor immediately for assistance with system access.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Status Legend */}
-        <div className={`mt-6 rounded-xl p-4 ${
-          isDark ? 'bg-gray-700/50' : 'bg-gray-50'
-        }`}>
-          <h4 className={`font-semibold mb-3 text-sm ${
-            isDark ? 'text-gray-200' : 'text-gray-800'
-          }`}>
-            Status Legend:
-          </h4>
-          <div className="grid grid-cols-2 gap-3 text-xs">
-            {[
-              { status: 'available', icon: CheckCircle, label: 'Available' },
-              { status: 'on-shift', icon: Clock, label: 'On Shift' },
-              { status: 'on-break', icon: Coffee, label: 'On Break' },
-              { status: 'shift-ended', icon: CheckCircle, label: 'Shift Ended' }
-            ].map(({ status, icon: Icon, label }) => {
-              const config = getStatusConfig(status as StaffStatus, theme);
               return (
-                <div key={status} className="flex items-center space-x-2">
-                  <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${config.statusBg}`}>
-                    <Icon className={`h-3 w-3 ${config.statusText}`} />
-                    <span className={`font-medium ${config.statusText}`}>
-                      {label}
-                    </span>
-                  </div>
-                </div>
+                <TouchableOpacity
+                  key={staff.id}
+                  onPress={() => onStaffSelect(staff)}
+                  style={[
+                    styles.staffButton,
+                    {
+                      backgroundColor: config.backgroundColor,
+                      borderColor: config.borderColor,
+                    },
+                  ]}
+                >
+                  <View style={styles.staffInfo}>
+                    <Text style={[styles.staffName, { color: config.textColor }]}>
+                      {staff.name}
+                    </Text>
+                    <View style={[styles.statusBadge, { backgroundColor: config.statusBg }]}>
+                      <StatusIcon size={12} color={config.statusText} />
+                      <Text style={[styles.statusText, { color: config.statusText }]}>
+                        {config.statusLabel}
+                      </Text>
+                    </View>
+                  </View>
+                  <ChevronRight
+                    size={20}
+                    color={isDark ? '#6b7280' : '#9ca3af'}
+                  />
+                </TouchableOpacity>
               );
             })}
-          </div>
-        </div>
-      </div>
+          </View>
+
+          {/* Alert Box */}
+          <View style={styles.alertBox}>
+            <View style={styles.alertContent}>
+              <AlertCircle
+                size={20}
+                color={isDark ? '#fbbf24' : '#d97706'}
+                style={styles.alertIcon}
+              />
+              <View style={styles.alertText}>
+                <Text style={styles.alertTitle}>Name Not Listed?</Text>
+                <Text style={styles.alertDescription}>
+                  If your name is not listed above, please contact your supervisor immediately for assistance with system access.
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Status Legend */}
+          <View style={styles.legendContainer}>
+            <Text style={styles.legendTitle}>Status Legend:</Text>
+            <View style={styles.legendGrid}>
+              {[
+                { status: 'available', icon: CheckCircle, label: 'Available' },
+                { status: 'on-shift', icon: Clock, label: 'On Shift' },
+                { status: 'on-break', icon: Coffee, label: 'On Break' },
+                { status: 'shift-ended', icon: CheckCircle, label: 'Shift Ended' },
+              ].map(({ status, icon: Icon, label }) => {
+                const config = getStatusConfig(status as StaffStatus, theme);
+                return (
+                  <View key={status} style={styles.legendItem}>
+                    <View style={[styles.legendBadge, { backgroundColor: config.statusBg }]}>
+                      <Icon size={12} color={config.statusText} />
+                      <Text style={[styles.legendText, { color: config.statusText }]}>
+                        {label}
+                      </Text>
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          </View>
+        </View>
+      </ScrollView>
 
       {/* Settings Modal */}
-      {showSettings && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className={`rounded-2xl shadow-2xl p-6 w-full max-w-md ${
-            isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
-          }`}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                Settings
-              </h2>
-              <button
-                onClick={handleCancelSettings}
-                className={`p-1 rounded-lg transition-colors ${
-                  isDark 
-                    ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
-                }`}
+      <Modal
+        visible={showSettings}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={handleCancelSettings}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Settings</Text>
+              <TouchableOpacity
+                onPress={handleCancelSettings}
+                style={styles.closeButton}
               >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
+                <X size={20} color={isDark ? '#9ca3af' : '#6b7280'} />
+              </TouchableOpacity>
+            </View>
 
-            <div className="space-y-6">
+            <View style={styles.modalBody}>
               {/* Theme Toggle */}
-              <div>
-                <label className={`block text-sm font-medium mb-3 ${
-                  isDark ? 'text-gray-200' : 'text-gray-700'
-                }`}>
-                  Theme
-                </label>
-                <button
-                  onClick={onThemeToggle}
-                  className={`flex items-center justify-between w-full p-3 rounded-lg border transition-colors ${
-                    isDark 
-                      ? 'bg-gray-700 border-gray-600 hover:bg-gray-600' 
-                      : 'bg-gray-50 border-gray-300 hover:bg-gray-100'
-                  }`}
+              <View style={styles.settingItem}>
+                <Text style={styles.settingLabel}>Theme</Text>
+                <TouchableOpacity
+                  onPress={onThemeToggle}
+                  style={styles.themeToggle}
                 >
-                  <div className="flex items-center space-x-3">
+                  <View style={styles.themeInfo}>
                     {isDark ? (
-                      <Moon className="h-5 w-5 text-blue-400" />
+                      <Moon size={20} color="#60a5fa" />
                     ) : (
-                      <Sun className="h-5 w-5 text-yellow-600" />
+                      <Sun size={20} color="#d97706" />
                     )}
-                    <span className={isDark ? 'text-gray-200' : 'text-gray-700'}>
+                    <Text style={styles.themeText}>
                       {isDark ? 'Dark Mode' : 'Light Mode'}
-                    </span>
-                  </div>
-                  <div className={`w-12 h-6 rounded-full p-1 transition-colors ${
-                    isDark ? 'bg-blue-600' : 'bg-gray-300'
-                  }`}>
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                      isDark ? 'translate-x-6' : 'translate-x-0'
-                    }`} />
-                  </div>
-                </button>
-              </div>
+                    </Text>
+                  </View>
+                  <Switch
+                    value={isDark}
+                    onValueChange={onThemeToggle}
+                    trackColor={{ false: '#d1d5db', true: '#3b82f6' }}
+                    thumbColor={isDark ? '#ffffff' : '#f3f4f6'}
+                  />
+                </TouchableOpacity>
+              </View>
 
               {/* API Server */}
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${
-                  isDark ? 'text-gray-200' : 'text-gray-700'
-                }`}>
-                  API Server
-                </label>
-                <div className="relative">
-                  <Server className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${
-                    isDark ? 'text-gray-400' : 'text-gray-500'
-                  }`} />
-                  <input
-                    type="url"
-                    value={tempApiServer}
-                    onChange={(e) => setTempApiServer(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:border-blue-500'
-                    } focus:ring-2 focus:ring-blue-500/20`}
-                    placeholder="https://api.company.com"
+              <View style={styles.settingItem}>
+                <Text style={styles.settingLabel}>API Server</Text>
+                <View style={styles.inputContainer}>
+                  <Server
+                    size={20}
+                    color={isDark ? '#9ca3af' : '#6b7280'}
+                    style={styles.inputIcon}
                   />
-                </div>
-                <p className={`text-xs mt-1 ${
-                  isDark ? 'text-gray-400' : 'text-gray-500'
-                }`}>
+                  <TextInput
+                    value={tempApiServer}
+                    onChangeText={setTempApiServer}
+                    style={styles.textInput}
+                    placeholder="https://api.company.com"
+                    placeholderTextColor={isDark ? '#6b7280' : '#9ca3af'}
+                    keyboardType="url"
+                  />
+                </View>
+                <Text style={styles.inputHelp}>
                   Enter the API server URL for time management data
-                </p>
-              </div>
-            </div>
+                </Text>
+              </View>
+            </View>
 
-            <div className="flex space-x-3 mt-8">
-              <button
-                onClick={handleCancelSettings}
-                className={`flex-1 py-2 px-4 rounded-lg border transition-colors ${
-                  isDark 
-                    ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
-                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                }`}
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                onPress={handleCancelSettings}
+                style={styles.cancelButton}
               >
-                Cancel
-              </button>
-              <button
-                onClick={handleSaveSettings}
-                className="flex-1 py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={handleSaveSettings}
+                style={styles.saveButton}
               >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    </SafeAreaView>
   );
 };
+
+const createStyles = (isDark: boolean) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: isDark ? '#111827' : '#f3f4f6',
+    },
+    scrollContainer: {
+      flexGrow: 1,
+      justifyContent: 'center',
+      padding: 16,
+    },
+    mainCard: {
+      backgroundColor: isDark ? '#1f2937' : '#ffffff',
+      borderRadius: 16,
+      padding: 32,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.15,
+      shadowRadius: 20,
+      elevation: 8,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: isDark ? '#374151' : 'transparent',
+    },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      marginBottom: 32,
+    },
+    headerContent: {
+      flex: 1,
+      alignItems: 'center',
+    },
+    iconContainer: {
+      backgroundColor: isDark ? '#1e3a8a' : '#dbeafe',
+      padding: 12,
+      borderRadius: 50,
+      marginBottom: 16,
+    },
+    title: {
+      fontSize: 24,
+      fontWeight: 'bold',
+      color: isDark ? '#ffffff' : '#111827',
+      marginBottom: 8,
+      textAlign: 'center',
+    },
+    subtitle: {
+      color: isDark ? '#d1d5db' : '#6b7280',
+      textAlign: 'center',
+      fontSize: 16,
+    },
+    settingsButton: {
+      padding: 8,
+      borderRadius: 8,
+    },
+    staffList: {
+      marginBottom: 32,
+    },
+    staffButton: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: 16,
+      borderRadius: 12,
+      marginBottom: 12,
+      borderWidth: 1,
+    },
+    staffInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      flex: 1,
+    },
+    staffName: {
+      fontSize: 16,
+      fontWeight: '500',
+      marginRight: 16,
+    },
+    statusBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+    },
+    statusText: {
+      fontSize: 12,
+      fontWeight: '500',
+      marginLeft: 4,
+    },
+    alertBox: {
+      backgroundColor: isDark ? '#451a03' : '#fef3c7',
+      borderColor: isDark ? '#92400e' : '#f59e0b',
+      borderWidth: 1,
+      borderRadius: 12,
+      padding: 16,
+      marginBottom: 24,
+    },
+    alertContent: {
+      flexDirection: 'row',
+      alignItems: 'flex-start',
+    },
+    alertIcon: {
+      marginTop: 2,
+      marginRight: 12,
+    },
+    alertText: {
+      flex: 1,
+    },
+    alertTitle: {
+      fontSize: 16,
+      fontWeight: '600',
+      color: isDark ? '#fbbf24' : '#92400e',
+      marginBottom: 4,
+    },
+    alertDescription: {
+      fontSize: 14,
+      color: isDark ? '#fde68a' : '#a16207',
+      lineHeight: 20,
+    },
+    legendContainer: {
+      backgroundColor: isDark ? '#374151' : '#f9fafb',
+      borderRadius: 12,
+      padding: 16,
+    },
+    legendTitle: {
+      fontSize: 14,
+      fontWeight: '600',
+      color: isDark ? '#e5e7eb' : '#1f2937',
+      marginBottom: 12,
+    },
+    legendGrid: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+    },
+    legendItem: {
+      width: '48%',
+      marginBottom: 12,
+    },
+    legendBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      borderRadius: 12,
+      alignSelf: 'flex-start',
+    },
+    legendText: {
+      fontSize: 12,
+      fontWeight: '500',
+      marginLeft: 4,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 16,
+    },
+    modalContent: {
+      backgroundColor: isDark ? '#1f2937' : '#ffffff',
+      borderRadius: 16,
+      padding: 24,
+      width: '100%',
+      maxWidth: 400,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 8 },
+      shadowOpacity: 0.25,
+      shadowRadius: 20,
+      elevation: 12,
+      borderWidth: isDark ? 1 : 0,
+      borderColor: isDark ? '#374151' : 'transparent',
+    },
+    modalHeader: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      marginBottom: 24,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      color: isDark ? '#ffffff' : '#111827',
+    },
+    closeButton: {
+      padding: 4,
+      borderRadius: 8,
+    },
+    modalBody: {
+      marginBottom: 32,
+    },
+    settingItem: {
+      marginBottom: 24,
+    },
+    settingLabel: {
+      fontSize: 14,
+      fontWeight: '500',
+      color: isDark ? '#e5e7eb' : '#374151',
+      marginBottom: 12,
+    },
+    themeToggle: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      backgroundColor: isDark ? '#374151' : '#f9fafb',
+      borderColor: isDark ? '#4b5563' : '#d1d5db',
+      borderWidth: 1,
+      borderRadius: 8,
+      padding: 12,
+    },
+    themeInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+    },
+    themeText: {
+      color: isDark ? '#e5e7eb' : '#374151',
+      marginLeft: 12,
+      fontSize: 16,
+    },
+    inputContainer: {
+      position: 'relative',
+    },
+    inputIcon: {
+      position: 'absolute',
+      left: 12,
+      top: 14,
+      zIndex: 1,
+    },
+    textInput: {
+      backgroundColor: isDark ? '#374151' : '#ffffff',
+      borderColor: isDark ? '#4b5563' : '#d1d5db',
+      borderWidth: 1,
+      borderRadius: 8,
+      paddingLeft: 44,
+      paddingRight: 16,
+      paddingVertical: 12,
+      fontSize: 16,
+      color: isDark ? '#ffffff' : '#111827',
+    },
+    inputHelp: {
+      fontSize: 12,
+      color: isDark ? '#9ca3af' : '#6b7280',
+      marginTop: 4,
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      gap: 12,
+    },
+    cancelButton: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      borderRadius: 8,
+      borderColor: isDark ? '#4b5563' : '#d1d5db',
+      borderWidth: 1,
+      alignItems: 'center',
+    },
+    cancelButtonText: {
+      color: isDark ? '#d1d5db' : '#374151',
+      fontSize: 16,
+      fontWeight: '500',
+    },
+    saveButton: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 16,
+      backgroundColor: '#3b82f6',
+      borderRadius: 8,
+      alignItems: 'center',
+    },
+    saveButtonText: {
+      color: '#ffffff',
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });
 
 export default StaffSelection;

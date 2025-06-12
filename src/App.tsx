@@ -1,4 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import {
+  View,
+  StatusBar,
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { globalStyles, colors, lightTheme, darkTheme } from './styles/globalStyles';
 import StaffSelection from './components/StaffSelection';
 import Authentication from './components/Authentication';
 import Dashboard from './components/Dashboard';
@@ -40,28 +46,51 @@ function App() {
     '8': 'on-break',
   });
 
-  // Load theme and API server from localStorage on mount
+  // Load theme and API server from AsyncStorage on mount
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    const savedApiServer = localStorage.getItem('apiServer');
-    
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-    if (savedApiServer) {
-      setApiServer(savedApiServer);
-    }
+    const loadStoredData = async () => {
+      try {
+        const savedTheme = await AsyncStorage.getItem('theme') as Theme;
+        const savedApiServer = await AsyncStorage.getItem('apiServer');
+        
+        if (savedTheme) {
+          setTheme(savedTheme);
+        }
+        if (savedApiServer) {
+          setApiServer(savedApiServer);
+        }
+      } catch (error) {
+        console.error('Error loading stored data:', error);
+      }
+    };
+
+    loadStoredData();
   }, []);
 
-  // Apply theme to document
+  // Save theme to AsyncStorage
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    localStorage.setItem('theme', theme);
+    const saveTheme = async () => {
+      try {
+        await AsyncStorage.setItem('theme', theme);
+      } catch (error) {
+        console.error('Error saving theme:', error);
+      }
+    };
+
+    saveTheme();
   }, [theme]);
 
-  // Save API server to localStorage
+  // Save API server to AsyncStorage
   useEffect(() => {
-    localStorage.setItem('apiServer', apiServer);
+    const saveApiServer = async () => {
+      try {
+        await AsyncStorage.setItem('apiServer', apiServer);
+      } catch (error) {
+        console.error('Error saving API server:', error);
+      }
+    };
+
+    saveApiServer();
   }, [apiServer]);
 
   const handleStaffSelect = (staff: Staff) => {
@@ -88,12 +117,15 @@ function App() {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
+  const currentTheme = theme === 'dark' ? darkTheme : lightTheme;
+
   return (
-    <div className={`min-h-screen transition-colors duration-300 ${
-      theme === 'dark' 
-        ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
-        : 'bg-gradient-to-br from-blue-50 to-indigo-100'
-    }`}>
+    <View style={[globalStyles.container, { backgroundColor: currentTheme.background }]}>
+      <StatusBar 
+        barStyle={theme === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={currentTheme.background}
+      />
+      
       {currentStep === 'selection' && (
         <StaffSelection 
           onStaffSelect={handleStaffSelect} 
@@ -123,7 +155,7 @@ function App() {
           theme={theme}
         />
       )}
-    </div>
+    </View>
   );
 }
 
