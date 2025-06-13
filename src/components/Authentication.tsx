@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Lock, Shield, ArrowLeft, Delete } from 'lucide-react';
+import { useApi } from '../hooks/useApi';
 import type { Staff, Theme } from '../App';
+import type { TimelogEntry } from '../types/api';
 
 interface AuthenticationProps {
   staff: Staff;
-  onAuthSuccess: () => void;
+  onAuthSuccess: (timelogEntry?: TimelogEntry) => void;
   onBack: () => void;
   theme: Theme;
 }
@@ -13,6 +15,8 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
   const [pin, setPin] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  const { authenticateStaff, login } = useApi();
 
   const isDark = theme === 'dark';
 
@@ -33,13 +37,26 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
     setError('');
     setIsLoading(true);
 
-    // Simulate authentication delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (pin === staff.pin) {
-      onAuthSuccess();
-    } else {
-      setError('Invalid PIN. Please try again.');
+    try {
+      // First authenticate the staff member
+      const authResult = await authenticateStaff(staff.id, pin);
+      
+      if (authResult) {
+        // If authentication successful, perform login to get timelog entry
+        const loginResult = await login(staff.id, pin);
+        
+        if (loginResult) {
+          onAuthSuccess(loginResult);
+        } else {
+          // If login fails but auth succeeded, still proceed
+          onAuthSuccess();
+        }
+      } else {
+        setError('Invalid PIN. Please try again.');
+        setPin('');
+      }
+    } catch (err) {
+      setError('Authentication failed. Please try again.');
       setPin('');
     }
     

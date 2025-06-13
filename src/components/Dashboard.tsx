@@ -1,5 +1,6 @@
-import React from 'react';
-import { Clock, Play, Pause, Square, LogOut, Calendar, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { Clock, Play, Pause, Square, LogOut, Calendar, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import { useApi } from '../hooks/useApi';
 import type { Staff, TimeEntry, Theme } from '../App';
 
 interface DashboardProps {
@@ -8,10 +9,37 @@ interface DashboardProps {
   setTimeEntries: React.Dispatch<React.SetStateAction<TimeEntry>>;
   onLogout: () => void;
   theme: Theme;
+  timelogID: string | null;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntries, onLogout, theme }) => {
+const Dashboard: React.FC<DashboardProps> = ({ 
+  staff, 
+  timeEntries, 
+  setTimeEntries, 
+  onLogout, 
+  theme, 
+  timelogID 
+}) => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  
+  const { logout, breakStart, breakEnd } = useApi();
+
   const isDark = theme === 'dark';
+
+  // Monitor online status
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
 
   const getCurrentTime = () => {
     return new Date().toLocaleTimeString('en-US', {
@@ -30,12 +58,66 @@ const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntrie
     });
   };
 
-  const handleTimeAction = (action: keyof TimeEntry) => {
+  const handleTimeAction = async (action: keyof TimeEntry) => {
+    if (!timelogID && (action === 'breakStart' || action === 'breakEnd')) {
+      console.error('No timelogID available for break actions');
+      return;
+    }
+
+    setActionLoading(action);
     const currentTime = getCurrentTime();
-    setTimeEntries(prev => ({
-      ...prev,
-      [action]: currentTime
-    }));
+
+    try {
+      let success = false;
+
+      switch (action) {
+        case 'breakStart':
+          if (timelogID) {
+            const result = await breakStart(staff.id, staff.pin, timelogID);
+            success = !!result;
+          }
+          break;
+        case 'breakEnd':
+          if (timelogID) {
+            const result = await breakEnd(staff.id, staff.pin, timelogID);
+            success = !!result;
+          }
+          break;
+        case 'shiftEnd':
+          const result = await logout(staff.id, staff.pin);
+          success = !!result;
+          break;
+        default:
+          // For local-only actions or fallback
+          success = true;
+      }
+
+      if (success) {
+        setTimeEntries(prev => ({
+          ...prev,
+          [action]: currentTime
+        }));
+      }
+    } catch (error) {
+      console.error(`Failed to ${action}:`, error);
+      // Still update local state for offline functionality
+      setTimeEntries(prev => ({
+        ...prev,
+        [action]: currentTime
+      }));
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout(staff.id, staff.pin);
+    } catch (error) {
+      console.error('Logout API call failed:', error);
+    } finally {
+      onLogout();
+    }
   };
 
   const getActionStatus = () => {
@@ -76,17 +158,34 @@ const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntrie
                 </p>
               </div>
             </div>
-            <button
-              onClick={onLogout}
-              className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-colors touch-manipulation ${
-                isDark 
-                  ? 'text-gray-400 hover:text-red-400 hover:bg-red-900/20 active:bg-red-800/30' 
-                  : 'text-gray-600 hover:text-red-600 hover:bg-red-50 active:bg-red-100'
-              }`}
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+            
+            <div className="flex items-center space-x-3">
+              {/* Connection Status */}
+              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs ${
+                isOnline 
+                  ? (isDark ? 'bg-green-900/50 text-green-400' : 'bg-green-100 text-green-700')
+                  : (isDark ? 'bg-red-900/50 text-red-400' : 'bg-red-100 text-red-700')
+              }`}>
+                {isOnline ? (
+                  <Wifi className="h-3 w-3" />
+                ) : (
+                  <WifiOff className="h-3 w-3" />
+                )}
+                <span>{isOnline ? 'Online' : 'Offline'}</span>
+              </div>
+              
+              <button
+                onClick={handleLogout}
+                className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-colors touch-manipulation ${
+                  isDark 
+                    ? 'text-gray-400 hover:text-red-400 hover:bg-red-900/20 active:bg-red-800/30' 
+                    : 'text-gray-600 hover:text-red-600 hover:bg-red-50 active:bg-red-100'
+                }`}
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -103,39 +202,36 @@ const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntrie
             
             <div className="space-y-3 sm:space-y-4">
               <button
-                onClick={() => handleTimeAction('shiftStart')}
-                disabled={!!timeEntries.shiftStart}
-                className="w-full flex items-center justify-center space-x-3 p-4 bg-green-600 text-white rounded-xl hover:bg-green-700 active:bg-green-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors touch-manipulation no-select"
-              >
-                <Play className="h-5 w-5" />
-                <span className="font-medium">Shift Start</span>
-              </button>
-
-              <button
                 onClick={() => handleTimeAction('breakStart')}
-                disabled={!timeEntries.shiftStart || !!timeEntries.breakStart || !!timeEntries.shiftEnd}
+                disabled={!timeEntries.shiftStart || !!timeEntries.breakStart || !!timeEntries.shiftEnd || actionLoading === 'breakStart'}
                 className="w-full flex items-center justify-center space-x-3 p-4 bg-yellow-600 text-white rounded-xl hover:bg-yellow-700 active:bg-yellow-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors touch-manipulation no-select"
               >
                 <Pause className="h-5 w-5" />
-                <span className="font-medium">Break Start</span>
+                <span className="font-medium">
+                  {actionLoading === 'breakStart' ? 'Starting Break...' : 'Break Start'}
+                </span>
               </button>
 
               <button
                 onClick={() => handleTimeAction('breakEnd')}
-                disabled={!timeEntries.breakStart || !!timeEntries.breakEnd}
+                disabled={!timeEntries.breakStart || !!timeEntries.breakEnd || actionLoading === 'breakEnd'}
                 className="w-full flex items-center justify-center space-x-3 p-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors touch-manipulation no-select"
               >
                 <Play className="h-5 w-5" />
-                <span className="font-medium">Break End</span>
+                <span className="font-medium">
+                  {actionLoading === 'breakEnd' ? 'Ending Break...' : 'Break End'}
+                </span>
               </button>
 
               <button
                 onClick={() => handleTimeAction('shiftEnd')}
-                disabled={!timeEntries.shiftStart || !!timeEntries.shiftEnd}
+                disabled={!timeEntries.shiftStart || !!timeEntries.shiftEnd || actionLoading === 'shiftEnd'}
                 className="w-full flex items-center justify-center space-x-3 p-4 bg-red-600 text-white rounded-xl hover:bg-red-700 active:bg-red-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors touch-manipulation no-select"
               >
                 <Square className="h-5 w-5" />
-                <span className="font-medium">Shift End</span>
+                <span className="font-medium">
+                  {actionLoading === 'shiftEnd' ? 'Ending Shift...' : 'Shift End'}
+                </span>
               </button>
             </div>
           </div>
@@ -261,6 +357,14 @@ const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntrie
               {status === 'back-from-break' && 'Back from Break'}
               {status === 'shift-ended' && 'Shift Completed'}
             </div>
+            
+            {timelogID && (
+              <div className="mt-3">
+                <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Session ID: {timelogID}
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Important Notes */}
@@ -286,6 +390,7 @@ const Dashboard: React.FC<DashboardProps> = ({ staff, timeEntries, setTimeEntrie
                   <li>• Attendance records are monitored for compliance</li>
                   <li>• Follow company attendance policy guidelines</li>
                   <li>• Contact supervisor for any system issues</li>
+                  {!isOnline && <li>• Working offline - data will sync when online</li>}
                 </ul>
               </div>
             </div>

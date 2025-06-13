@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import StaffSelection from './components/StaffSelection';
 import Authentication from './components/Authentication';
 import Dashboard from './components/Dashboard';
+import { apiService } from './services/api';
+import type { ApiStaff, TimelogEntry } from './types/api';
 
 export interface Staff {
   id: string;
@@ -26,30 +28,26 @@ function App() {
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [timeEntries, setTimeEntries] = useState<TimeEntry>({});
   const [theme, setTheme] = useState<Theme>('light');
-  const [apiServer, setApiServer] = useState<string>('https://api.company.com');
+  const [apiServer, setApiServer] = useState<string>('http://localhost:5000/api');
+  const [currentTimelogID, setCurrentTimelogID] = useState<string | null>(null);
   
-  // Mock staff statuses - in a real app, this would come from a backend
-  const [staffStatuses] = useState<Record<string, StaffStatus>>({
-    '1': 'available',
-    '2': 'on-shift',
-    '3': 'on-break',
-    '4': 'available',
-    '5': 'shift-ended',
-    '6': 'on-shift',
-    '7': 'available',
-    '8': 'on-break',
-  });
+  // Staff data from API
+  const [staffList, setStaffList] = useState<Staff[]>([]);
+  const [staffStatuses, setStaffStatuses] = useState<Record<string, StaffStatus>>({});
 
   // Load theme and API server from localStorage on mount
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') as Theme;
-    const savedApiServer = localStorage.getItem('apiServer');
+    const savedApiServer = localStorage.getItem('apiBaseUrl');
     
     if (savedTheme) {
       setTheme(savedTheme);
     }
     if (savedApiServer) {
       setApiServer(savedApiServer);
+    } else {
+      // Set default API server
+      apiService.setBaseUrl(apiServer);
     }
   }, []);
 
@@ -59,9 +57,9 @@ function App() {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
-  // Save API server to localStorage
+  // Save API server to localStorage and update service
   useEffect(() => {
-    localStorage.setItem('apiServer', apiServer);
+    apiService.setBaseUrl(apiServer);
   }, [apiServer]);
 
   const handleStaffSelect = (staff: Staff) => {
@@ -69,7 +67,28 @@ function App() {
     setCurrentStep('auth');
   };
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = (timelogEntry?: TimelogEntry) => {
+    if (timelogEntry?.timelogID) {
+      setCurrentTimelogID(timelogEntry.timelogID);
+      
+      // Update time entries based on API response
+      const newTimeEntries: TimeEntry = {};
+      if (timelogEntry.loginTime) {
+        newTimeEntries.shiftStart = new Date(timelogEntry.loginTime).toLocaleTimeString();
+      }
+      if (timelogEntry.breakStartTime) {
+        newTimeEntries.breakStart = new Date(timelogEntry.breakStartTime).toLocaleTimeString();
+      }
+      if (timelogEntry.breakEndTime) {
+        newTimeEntries.breakEnd = new Date(timelogEntry.breakEndTime).toLocaleTimeString();
+      }
+      if (timelogEntry.logoutTime) {
+        newTimeEntries.shiftEnd = new Date(timelogEntry.logoutTime).toLocaleTimeString();
+      }
+      
+      setTimeEntries(newTimeEntries);
+    }
+    
     setCurrentStep('dashboard');
   };
 
@@ -81,11 +100,17 @@ function App() {
   const handleLogout = () => {
     setSelectedStaff(null);
     setTimeEntries({});
+    setCurrentTimelogID(null);
     setCurrentStep('selection');
   };
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
+  const handleApiServerChange = (server: string) => {
+    setApiServer(server);
+    apiService.setBaseUrl(server);
   };
 
   return (
@@ -101,7 +126,10 @@ function App() {
           theme={theme}
           onThemeToggle={toggleTheme}
           apiServer={apiServer}
-          onApiServerChange={setApiServer}
+          onApiServerChange={handleApiServerChange}
+          staffList={staffList}
+          setStaffList={setStaffList}
+          setStaffStatuses={setStaffStatuses}
         />
       )}
       
@@ -121,6 +149,7 @@ function App() {
           setTimeEntries={setTimeEntries}
           onLogout={handleLogout}
           theme={theme}
+          timelogID={currentTimelogID}
         />
       )}
     </div>
