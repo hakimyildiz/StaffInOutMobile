@@ -31,7 +31,11 @@ class ApiService {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const result = await response.json();
+      let result = await response.json();
+      if(result?.data) {
+        //console.log('API Response:', result.data);
+         return result as ApiResponse<T>;
+      }
       
       return {
         success: true,
@@ -48,7 +52,9 @@ class ApiService {
 
   // Staff List Retrieval
   async getStaffList(): Promise<ApiResponse<ApiStaff[]>> {
-    return this.makeRequest<ApiStaff[]>('/user/staff');
+    let result = this.makeRequest<ApiStaff[]>('/user/staff');
+    console.log('API Response:', result);
+    return result;
   }
 
   // Staff Authentication
@@ -57,8 +63,9 @@ class ApiService {
       UserID: userID,
       PinCode: pinCode,
     };
-    return this.makeRequest('/user/staff', 'POST', data);
-  }
+    return await this.makeRequest('/timelog/staff', 'POST', data);
+  } 
+
 
   // Time Tracking Operations
   async checkin(userID: Number, pinCode: Number): Promise<ApiResponse<TimelogEntry>> {
@@ -66,7 +73,7 @@ class ApiService {
       UserID: userID,
       PinCode: pinCode,
     };
-    return this.makeRequest<TimelogEntry>('/timelog/checkin', 'POST', data);
+    return await this.makeRequest('/timelog/checkin', 'POST', data);
   }
 
   async checkout(userID: Number, pinCode: Number): Promise<ApiResponse<any>> {
@@ -74,7 +81,7 @@ class ApiService {
       UserID: userID,
       PinCode: pinCode,
     };
-    return this.makeRequest('/timelog/checkout', 'POST', data);
+    return await this.makeRequest('/timelog/checkout', 'POST', data);
   }
 
   async breakStart(userID: Number, pinCode: Number, timelogID: Number): Promise<ApiResponse<any>> {
@@ -83,7 +90,7 @@ class ApiService {
       PinCode: pinCode,
       timelogID,
     };
-    return this.makeRequest('/timelog/breakstart', 'POST', data);
+    return await this.makeRequest('/timelog/breakstart', 'POST', data);
   }
 
   async breakEnd(userID: Number, pinCode: Number, timelogID: Number): Promise<ApiResponse<any>> {
@@ -92,7 +99,7 @@ class ApiService {
       PinCode: pinCode,
       timelogID,
     };
-    return this.makeRequest('/timelog/breakend', 'POST', data);
+    return await this.makeRequest('/timelog/breakend', 'POST', data);
   }
 
   // Utility methods

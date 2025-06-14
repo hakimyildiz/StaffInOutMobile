@@ -10,6 +10,7 @@ export interface Staff {
   Name: string;
   WorkStatus?: string;
   BreakStatus?: string;
+
 }
 
 export interface TimeEntry {

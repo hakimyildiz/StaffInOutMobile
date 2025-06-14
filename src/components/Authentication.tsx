@@ -16,7 +16,7 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { authenticateStaff, checkIn } = useApi();
+  const { Login } = useApi();
 
   const isDark = theme === 'dark';
 
@@ -39,18 +39,20 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
 
     try {
       // First authenticate the staff member
-      const authResult = await authenticateStaff(staff.UserID, pin);
+      const authResult = await Login(staff.UserID, pin);
       
       if (authResult) {
+        console.log('Authentication successful:', authResult);
+        onAuthSuccess(authResult);
         // If authentication successful, perform login to get timelog entry
-        const loginResult = await checkIn(staff.UserID, pin);
+       /* const loginResult = await CheckIn(staff.UserID, pin);
         
         if (loginResult) {
           onAuthSuccess(loginResult);
         } else {
           // If login fails but auth succeeded, still proceed
           onAuthSuccess();
-        }
+        }*/
       } else {
         setError('Invalid PIN. Please try again.');
         setPin('');
@@ -72,7 +74,9 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
 
   return (
     <div className="max-h-screen flex items-center justify-center p-4 safe-area-padding">
-      <div className={`rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md transition-colors ${
+      <div className={`rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md transition-colors 
+       min-w-[800px] max-[800px]:min-w-screen 
+       min-h-[1200px] max-[800px]:min-h-screen  ${
         isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
       }`}>
         <button

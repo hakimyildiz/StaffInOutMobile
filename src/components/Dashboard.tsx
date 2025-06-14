@@ -23,7 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
-  const { CheckOut, BreakStart, BreakEnd } = useApi();
+  const {CheckIn, CheckOut, BreakStart, BreakEnd } = useApi();
 
   const isDark = theme === 'dark';
 
@@ -42,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   }, []);
 
   const getCurrentTime = () => {
-    return new Date().toLocaleTimeString('en-US', {
+    return new Date().toLocaleTimeString('en-GB', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit'
@@ -50,7 +50,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   };
 
   const getCurrentDate = () => {
-    return new Date().toLocaleDateString('en-US', {
+    return new Date().toLocaleDateString('en-GB', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -73,19 +73,23 @@ const Dashboard: React.FC<DashboardProps> = ({
       switch (action) {
         case 'breakStart':
           if (timelogID) {
-            const result = await BreakStart(staff.UserID, timelogID, staff.PinCode);
-            success = !!result;
+            const result1 = await BreakStart(timelogID);
+            success = !!result1;
           }
           break;
         case 'breakEnd':
           if (timelogID) {
-            const result = await BreakEnd(staff.UserID, timelogID, staff.PinCode);
-            success = !!result;
+            const result2 = await BreakEnd(timelogID);
+            success = !!result2;
           }
           break;
         case 'shiftEnd':
-          const result = await CheckOut(staff.UserID, staff.PinCode);
-          success = !!result;
+          let result3 = await CheckOut();
+          success = !!result3;
+          break;
+        case 'shiftStart':
+          const result4 = await CheckIn();
+          success = !!result4;
           break;
         default:
           // For local-only actions or fallback
@@ -112,7 +116,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleLogout = async () => {
     try {
-      await CheckOut(staff.UserID, staff.PinCode);
+      
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
@@ -135,7 +139,9 @@ const Dashboard: React.FC<DashboardProps> = ({
     <div className="min-h-screen p-4 safe-area-padding">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className={`rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 transition-colors ${
+        <div className={`rounded-2xl shadow-lg p-4 sm:p-6 mb-4 sm:mb-6 transition-colors 
+        min-w-[800px] max-[800px]:min-w-screen 
+        min-h-[1200px] max-[800px]:min-h-screen  ${
           isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
         }`}>
           <div className="flex items-center justify-between">
@@ -201,6 +207,17 @@ const Dashboard: React.FC<DashboardProps> = ({
             </h2>
             
             <div className="space-y-3 sm:space-y-4">
+              
+              <button
+                onClick={() => handleTimeAction('shiftStart')}
+                disabled={timeEntries.shiftStart==='' || !!timeEntries.shiftEnd || actionLoading === 'shiftStart'}
+                className="w-full flex items-center justify-center space-x-3 p-4 bg-red-600 text-white rounded-xl hover:bg-red-700 active:bg-red-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors touch-manipulation no-select"
+              >
+                <Square className="h-5 w-5" />
+                <span className="font-medium">
+                  {actionLoading === 'shiftStart' ? 'Starting Shift...' : 'Shift Start'}
+                </span>
+              </button>
               <button
                 onClick={() => handleTimeAction('breakStart')}
                 disabled={!timeEntries.shiftStart || !!timeEntries.breakStart || !!timeEntries.shiftEnd || actionLoading === 'breakStart'}

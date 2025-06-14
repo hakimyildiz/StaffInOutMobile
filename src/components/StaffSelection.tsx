@@ -131,6 +131,7 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
         Name: apiStaff.FirstName + ' ' + apiStaff.LastName,
         WorkStatus: apiStaff.WorkStatus,
         BreakStatus: apiStaff.BreakStatus,
+
         
       }));
       
@@ -165,7 +166,9 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 safe-area-padding">
-      <div className={`rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transition-colors ${
+      <div className={`rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-2xl transition-colors 
+       min-w-[800px] max-[800px]:min-w-screen 
+       min-h-[1200px] max-[800px]:min-h-screen  ${
         isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
       }`}>
         {/* Header with Settings and Connection Status */}
