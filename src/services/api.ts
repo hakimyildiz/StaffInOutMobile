@@ -52,7 +52,7 @@ class ApiService {
   }
 
   // Staff Authentication
-  async authenticateStaff(userID: string, pinCode: string): Promise<ApiResponse<any>> {
+  async authenticateStaff(userID: Number, pinCode: Number): Promise<ApiResponse<any>> {
     const data: ApiAuthRequest = {
       UserID: userID,
       PinCode: pinCode,
@@ -61,23 +61,23 @@ class ApiService {
   }
 
   // Time Tracking Operations
-  async login(userID: string, pinCode: string): Promise<ApiResponse<TimelogEntry>> {
+  async login(userID: Number, pinCode: Number): Promise<ApiResponse<TimelogEntry>> {
     const data: ApiAuthRequest = {
       UserID: userID,
       PinCode: pinCode,
     };
-    return this.makeRequest<TimelogEntry>('/timelog/login', 'POST', data);
+    return this.makeRequest<TimelogEntry>('/timelog/checkin', 'POST', data);
   }
 
-  async logout(userID: string, pinCode: string): Promise<ApiResponse<any>> {
+  async logout(userID: Number, pinCode: Number): Promise<ApiResponse<any>> {
     const data: ApiAuthRequest = {
       UserID: userID,
       PinCode: pinCode,
     };
-    return this.makeRequest('/timelog/logout', 'POST', data);
+    return this.makeRequest('/timelog/checkout', 'POST', data);
   }
 
-  async breakStart(userID: string, pinCode: string, timelogID: string): Promise<ApiResponse<any>> {
+  async breakStart(userID: Number, pinCode: Number, timelogID: Number): Promise<ApiResponse<any>> {
     const data: ApiTimelogRequest = {
       UserID: userID,
       PinCode: pinCode,
@@ -86,7 +86,7 @@ class ApiService {
     return this.makeRequest('/timelog/breakstart', 'POST', data);
   }
 
-  async breakEnd(userID: string, pinCode: string, timelogID: string): Promise<ApiResponse<any>> {
+  async breakEnd(userID: Number, pinCode: Number, timelogID: Number): Promise<ApiResponse<any>> {
     const data: ApiTimelogRequest = {
       UserID: userID,
       PinCode: pinCode,

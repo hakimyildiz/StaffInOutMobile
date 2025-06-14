@@ -39,11 +39,11 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
 
     try {
       // First authenticate the staff member
-      const authResult = await authenticateStaff(staff.id, pin);
+      const authResult = await authenticateStaff(staff.UserID, parseInt(pin));
       
       if (authResult) {
         // If authentication successful, perform login to get timelog entry
-        const loginResult = await login(staff.id, pin);
+        const loginResult = await login(staff.UserID, parseInt(pin));
         
         if (loginResult) {
           onAuthSuccess(loginResult);
@@ -71,7 +71,7 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 safe-area-padding">
+    <div className="max-h-screen flex items-center justify-center p-4 safe-area-padding">
       <div className={`rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md transition-colors ${
         isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'
       }`}>
@@ -105,7 +105,7 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
           <p className={`mb-4 text-sm sm:text-base ${
             isDark ? 'text-gray-300' : 'text-gray-600'
           }`}>
-            Welcome, {staff.name}
+            
           </p>
         </div>
 
@@ -118,16 +118,11 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
             <Shield className={`h-5 w-5 ${
               isDark ? 'text-blue-400' : 'text-blue-600'
             }`} />
-            <div>
-              <p className={`font-semibold text-sm sm:text-base ${
-                isDark ? 'text-blue-300' : 'text-blue-800'
-              }`}>
-                Security Number
-              </p>
+            <div>              
               <p className={`font-mono text-base sm:text-lg ${
                 isDark ? 'text-blue-200' : 'text-blue-700'
               }`}>
-                {staff.securityNumber}
+                Welcome, {staff.Name}
               </p>
             </div>
           </div>
@@ -195,6 +190,7 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
                 return (
                   <button
                     key={index}
+                    aria-label="Backspace"
                     onClick={() => handleKeypadPress(button)}
                     className={`col-span-1 font-semibold py-4 px-4 rounded-lg transition-colors flex items-center justify-center touch-manipulation no-select ${
                       isDark 

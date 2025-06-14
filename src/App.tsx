@@ -6,10 +6,11 @@ import { apiService } from './services/api';
 import type { ApiStaff, TimelogEntry } from './types/api';
 
 export interface Staff {
-  id: string;
-  name: string;
-  pin: string;
-  securityNumber: string;
+  UserID: Number;
+  Name: string;
+  WorkStatus?: string;
+  BreakStatus?: string;
+  PinCode?: Number;
 }
 
 export interface TimeEntry {
@@ -68,8 +69,8 @@ function App() {
   };
 
   const handleAuthSuccess = (timelogEntry?: TimelogEntry) => {
-    if (timelogEntry?.timelogID) {
-      setCurrentTimelogID(timelogEntry.timelogID);
+    if (timelogEntry?.ID) {
+      setCurrentTimelogID(timelogEntry.ID);
       
       // Update time entries based on API response
       const newTimeEntries: TimeEntry = {};

@@ -1,18 +1,18 @@
 export interface ApiStaff {
-  UserID: string;
-  Name: string;
-  PinCode: string;
-  SecurityNumber?: string;
-  Status?: string;
+  UserID: Number;
+  FirstName: string;
+  LastName: string;
+  WorkStatus?: string;
+  BreakStatus?: string;
 }
 
 export interface ApiAuthRequest {
-  UserID: string;
-  PinCode: string;
+  UserID: Number;
+  PinCode: Number;
 }
 
 export interface ApiTimelogRequest extends ApiAuthRequest {
-  timelogID?: string;
+  timelogID?: Number;
 }
 
 export interface ApiResponse<T = any> {
@@ -23,8 +23,8 @@ export interface ApiResponse<T = any> {
 }
 
 export interface TimelogEntry {
-  timelogID: string;
-  UserID: string;
+  ID: Number;
+  UserID: Number;
   loginTime?: string;
   logoutTime?: string;
   breakStartTime?: string;

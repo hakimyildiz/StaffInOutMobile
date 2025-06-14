@@ -14,8 +14,11 @@ export const useApi = () => {
     
     try {
       const response = await apiCall();
-      
+      //console.log('List:', response.data.data);
       if (response.success && response.data) {
+        if(response.data.data) {
+          return response.data.data as T;
+        }
         return response.data;
       } else {
         setError(response.error || 'API call failed');
@@ -30,27 +33,31 @@ export const useApi = () => {
   }, []);
 
   const getStaffList = useCallback(async (): Promise<ApiStaff[] | null> => {
-    return handleApiCall(() => apiService.getStaffList());
+    let staffList: ApiStaff[] | null = null;
+    staffList = await handleApiCall(() => apiService.getStaffList());
+    //console.log('Staff List:', staffList);
+    return staffList;
+    //return handleApiCall(() => apiService.getStaffList());
   }, [handleApiCall]);
 
-  const authenticateStaff = useCallback(async (userID: string, pinCode: string): Promise<any> => {
-    return handleApiCall(() => apiService.authenticateStaff(userID, pinCode));
+  const authenticateStaff = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<any> => {
+    return handleApiCall(() => apiService.authenticateStaff(UserID, pinCode));
   }, [handleApiCall]);
 
-  const login = useCallback(async (userID: string, pinCode: string): Promise<TimelogEntry | null> => {
-    return handleApiCall(() => apiService.login(userID, pinCode));
+  const login = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<TimelogEntry | null> => {
+    return handleApiCall(() => apiService.login(UserID, pinCode));
   }, [handleApiCall]);
 
-  const logout = useCallback(async (userID: string, pinCode: string): Promise<any> => {
-    return handleApiCall(() => apiService.logout(userID, pinCode));
+  const logout = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<any> => {
+    return handleApiCall(() => apiService.logout(UserID, pinCode));
   }, [handleApiCall]);
 
-  const breakStart = useCallback(async (userID: string, pinCode: string, timelogID: string): Promise<any> => {
-    return handleApiCall(() => apiService.breakStart(userID, pinCode, timelogID));
+  const breakStart = useCallback(async (UserID: Number, timelogID: Number, pinCode: Number=-1): Promise<any> => {
+    return handleApiCall(() => apiService.breakStart(UserID, timelogID, pinCode));
   }, [handleApiCall]);
 
-  const breakEnd = useCallback(async (userID: string, pinCode: string, timelogID: string): Promise<any> => {
-    return handleApiCall(() => apiService.breakEnd(userID, pinCode, timelogID));
+  const breakEnd = useCallback(async (UserID: Number, timelogID: Number, pinCode: Number=-1): Promise<any> => {
+    return handleApiCall(() => apiService.breakEnd(UserID, timelogID, pinCode));
   }, [handleApiCall]);
 
   return {

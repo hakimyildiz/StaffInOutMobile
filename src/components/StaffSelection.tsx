@@ -125,11 +125,13 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
     
     if (apiStaffList) {
       // Convert API staff to internal format
+      //console.log('API Staff List:', apiStaffList);
       const convertedStaff: Staff[] = apiStaffList.map((apiStaff: ApiStaff) => ({
-        id: apiStaff.UserID,
-        name: apiStaff.Name,
-        pin: apiStaff.PinCode,
-        securityNumber: apiStaff.SecurityNumber || `SEC-${apiStaff.UserID.padStart(3, '0')}`
+        UserID: apiStaff.UserID,
+        Name: apiStaff.FirstName + ' ' + apiStaff.LastName,
+        WorkStatus: apiStaff.WorkStatus,
+        BreakStatus: apiStaff.BreakStatus,
+        
       }));
       
       setStaffList(convertedStaff);
@@ -137,7 +139,7 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
       // Set initial statuses based on API data
       const statuses: Record<string, StaffStatus> = {};
       apiStaffList.forEach((apiStaff: ApiStaff) => {
-        statuses[apiStaff.UserID] = (apiStaff.Status as StaffStatus) || 'available';
+        statuses[apiStaff.UserID.toString()] = (apiStaff.WorkStatus as StaffStatus) || 'available';
       });
       setStaffStatuses(statuses);
     }
@@ -201,6 +203,7 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
             {/* Refresh Button */}
             <button
               onClick={handleRefresh}
+              aria-label="Refresh Staff List"
               disabled={loading}
               className={`p-2 rounded-lg transition-colors touch-manipulation ${
                 isDark 
@@ -214,6 +217,7 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
             {/* Settings Button */}
             <button
               onClick={() => setShowSettings(true)}
+              aria-label="Open Settings"
               className={`p-2 rounded-lg transition-colors touch-manipulation ${
                 isDark 
                   ? 'text-gray-400 hover:text-white hover:bg-gray-700 active:bg-gray-600' 
@@ -268,19 +272,19 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
         {!loading && staffList.length > 0 && (
           <div className="space-y-3 mb-6 sm:mb-8">
             {staffList.map((staff) => {
-              const status = staffStatuses[staff.id] || 'available';
+              const status = staffStatuses[staff.UserID.toString()] || 'available';
               const config = getStatusConfig(status, theme);
               const StatusIcon = config.statusIcon;
 
               return (
                 <button
-                  key={staff.id}
+                  key={staff.UserID.toString()}
                   onClick={() => onStaffSelect(staff)}
                   className={`w-full flex items-center justify-between p-4 ${config.bgColor} rounded-xl transition-all duration-200 border group touch-manipulation no-select`}
                 >
                   <div className="flex items-center space-x-3 sm:space-x-4">
                     <span className={`font-medium text-sm sm:text-base ${config.textColor}`}>
-                      {staff.name}
+                      {staff.Name}
                     </span>
                     <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${config.statusBg}`}>
                       <StatusIcon className={`h-3 w-3 ${config.statusText}`} />
@@ -380,6 +384,7 @@ const StaffSelection: React.FC<StaffSelectionProps> = ({
               </h2>
               <button
                 onClick={handleCancelSettings}
+                aria-label="Close settings"
                 className={`p-2 rounded-lg transition-colors touch-manipulation ${
                   isDark 
                     ? 'text-gray-400 hover:text-white hover:bg-gray-700 active:bg-gray-600' 

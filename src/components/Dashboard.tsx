@@ -9,7 +9,7 @@ interface DashboardProps {
   setTimeEntries: React.Dispatch<React.SetStateAction<TimeEntry>>;
   onLogout: () => void;
   theme: Theme;
-  timelogID: string | null;
+  timelogID: Number | null;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
@@ -73,18 +73,18 @@ const Dashboard: React.FC<DashboardProps> = ({
       switch (action) {
         case 'breakStart':
           if (timelogID) {
-            const result = await breakStart(staff.id, staff.pin, timelogID);
+            const result = await breakStart(staff.UserID, timelogID, staff.PinCode);
             success = !!result;
           }
           break;
         case 'breakEnd':
           if (timelogID) {
-            const result = await breakEnd(staff.id, staff.pin, timelogID);
+            const result = await breakEnd(staff.UserID, timelogID, staff.PinCode);
             success = !!result;
           }
           break;
         case 'shiftEnd':
-          const result = await logout(staff.id, staff.pin);
+          const result = await logout(staff.UserID, staff.PinCode);
           success = !!result;
           break;
         default:
@@ -112,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleLogout = async () => {
     try {
-      await logout(staff.id, staff.pin);
+      await logout(staff.UserID, staff.PinCode);
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
@@ -154,7 +154,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                   Time Management Dashboard
                 </h1>
                 <p className={`text-sm sm:text-base ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                  Welcome back, {staff.name}
+                  Welcome back, {staff.Name}
                 </p>
               </div>
             </div>
@@ -361,7 +361,7 @@ const Dashboard: React.FC<DashboardProps> = ({
             {timelogID && (
               <div className="mt-3">
                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Session ID: {timelogID}
+                  Session ID: {timelogID.toString()}
                 </p>
               </div>
             )}
