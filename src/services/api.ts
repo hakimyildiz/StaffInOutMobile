@@ -61,7 +61,7 @@ class ApiService {
   }
 
   // Time Tracking Operations
-  async login(userID: Number, pinCode: Number): Promise<ApiResponse<TimelogEntry>> {
+  async checkin(userID: Number, pinCode: Number): Promise<ApiResponse<TimelogEntry>> {
     const data: ApiAuthRequest = {
       UserID: userID,
       PinCode: pinCode,
@@ -69,7 +69,7 @@ class ApiService {
     return this.makeRequest<TimelogEntry>('/timelog/checkin', 'POST', data);
   }
 
-  async logout(userID: Number, pinCode: Number): Promise<ApiResponse<any>> {
+  async checkout(userID: Number, pinCode: Number): Promise<ApiResponse<any>> {
     const data: ApiAuthRequest = {
       UserID: userID,
       PinCode: pinCode,

@@ -10,7 +10,6 @@ export interface Staff {
   Name: string;
   WorkStatus?: string;
   BreakStatus?: string;
-  PinCode?: Number;
 }
 
 export interface TimeEntry {
@@ -30,7 +29,7 @@ function App() {
   const [timeEntries, setTimeEntries] = useState<TimeEntry>({});
   const [theme, setTheme] = useState<Theme>('light');
   const [apiServer, setApiServer] = useState<string>('http://localhost:5000/api');
-  const [currentTimelogID, setCurrentTimelogID] = useState<string | null>(null);
+  const [currentTimelogID, setCurrentTimelogID] = useState<Number>(0);
   
   // Staff data from API
   const [staffList, setStaffList] = useState<Staff[]>([]);
@@ -101,7 +100,7 @@ function App() {
   const handleLogout = () => {
     setSelectedStaff(null);
     setTimeEntries({});
-    setCurrentTimelogID(null);
+    //setCurrentTimelogID(null);
     setCurrentStep('selection');
   };
 

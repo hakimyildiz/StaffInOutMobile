@@ -40,24 +40,49 @@ export const useApi = () => {
     //return handleApiCall(() => apiService.getStaffList());
   }, [handleApiCall]);
 
-  const authenticateStaff = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<any> => {
-    return handleApiCall(() => apiService.authenticateStaff(UserID, pinCode));
+  const authenticateStaff = useCallback(async (UserID: Number, pinCode: string): Promise<any> => {
+    let PinCode:Number = Number(pinCode);
+    if( Number.isNaN(PinCode)) {
+      setError('PIN code cannot be empty');
+      return null;
+    }
+    return handleApiCall(() => apiService.authenticateStaff(UserID, PinCode));
   }, [handleApiCall]);
 
-  const login = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<TimelogEntry | null> => {
-    return handleApiCall(() => apiService.login(UserID, pinCode));
+  const CheckIn = useCallback(async (UserID: Number, pinCode: string): Promise<TimelogEntry | null> => {
+    let PinCode:Number = Number(pinCode);
+    if( Number.isNaN(PinCode)) {
+      setError('PIN code cannot be empty');
+      return null;
+    }
+    return handleApiCall(() => apiService.checkin(UserID, PinCode));
   }, [handleApiCall]);
 
-  const logout = useCallback(async (UserID: Number, pinCode: Number=-1): Promise<any> => {
-    return handleApiCall(() => apiService.logout(UserID, pinCode));
+  const CheckOut = useCallback(async (UserID: Number, pinCode: string): Promise<any> => {
+    let PinCode:Number = Number(pinCode);
+    if( Number.isNaN(PinCode)) {
+      setError('PIN code cannot be empty');
+      return null;
+    }
+    return handleApiCall(() => apiService.checkout(UserID, PinCode));
   }, [handleApiCall]);
 
-  const breakStart = useCallback(async (UserID: Number, timelogID: Number, pinCode: Number=-1): Promise<any> => {
-    return handleApiCall(() => apiService.breakStart(UserID, timelogID, pinCode));
+  const BreakStart = useCallback(async (UserID: Number, timelogID: Number, pinCode: string): Promise<any> => {
+    let PinCode:Number = Number(pinCode);
+    if( Number.isNaN(PinCode)) {
+      setError('PIN code cannot be empty');
+      return null;
+    }
+    return handleApiCall(() => apiService.breakStart(UserID, timelogID, PinCode));
   }, [handleApiCall]);
 
-  const breakEnd = useCallback(async (UserID: Number, timelogID: Number, pinCode: Number=-1): Promise<any> => {
-    return handleApiCall(() => apiService.breakEnd(UserID, timelogID, pinCode));
+  const BreakEnd = useCallback(async (UserID: Number, timelogID: Number, pinCode: string): Promise<any> => {
+    let PinCode:Number = Number(pinCode);
+    if( Number.isNaN(PinCode)) {
+      setError('PIN code cannot be empty');
+      return null;
+    }
+    return handleApiCall(() => apiService.breakEnd(UserID, timelogID, PinCode));
   }, [handleApiCall]);
 
   return {
@@ -65,9 +90,9 @@ export const useApi = () => {
     error,
     getStaffList,
     authenticateStaff,
-    login,
-    logout,
-    breakStart,
-    breakEnd,
+    CheckIn,
+    CheckOut,
+    BreakStart,
+    BreakEnd,
   };
 };

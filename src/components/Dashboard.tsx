@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, Play, Pause, Square, LogOut, Calendar, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import { Clock, Play, Pause, Square, LogOut, Calendar, AlertTriangle, Wifi, WifiOff, Check } from 'lucide-react';
 import { useApi } from '../hooks/useApi';
 import type { Staff, TimeEntry, Theme } from '../App';
 
@@ -9,7 +9,7 @@ interface DashboardProps {
   setTimeEntries: React.Dispatch<React.SetStateAction<TimeEntry>>;
   onLogout: () => void;
   theme: Theme;
-  timelogID: Number | null;
+  timelogID: Number;
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ 
@@ -23,7 +23,7 @@ const Dashboard: React.FC<DashboardProps> = ({
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   
-  const { logout, breakStart, breakEnd } = useApi();
+  const { CheckOut, BreakStart, BreakEnd } = useApi();
 
   const isDark = theme === 'dark';
 
@@ -73,18 +73,18 @@ const Dashboard: React.FC<DashboardProps> = ({
       switch (action) {
         case 'breakStart':
           if (timelogID) {
-            const result = await breakStart(staff.UserID, timelogID, staff.PinCode);
+            const result = await BreakStart(staff.UserID, timelogID, staff.PinCode);
             success = !!result;
           }
           break;
         case 'breakEnd':
           if (timelogID) {
-            const result = await breakEnd(staff.UserID, timelogID, staff.PinCode);
+            const result = await BreakEnd(staff.UserID, timelogID, staff.PinCode);
             success = !!result;
           }
           break;
         case 'shiftEnd':
-          const result = await logout(staff.UserID, staff.PinCode);
+          const result = await CheckOut(staff.UserID, staff.PinCode);
           success = !!result;
           break;
         default:
@@ -112,7 +112,7 @@ const Dashboard: React.FC<DashboardProps> = ({
 
   const handleLogout = async () => {
     try {
-      await logout(staff.UserID, staff.PinCode);
+      await CheckOut(staff.UserID, staff.PinCode);
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {

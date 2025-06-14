@@ -16,7 +16,7 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { authenticateStaff, login } = useApi();
+  const { authenticateStaff, checkIn } = useApi();
 
   const isDark = theme === 'dark';
 
@@ -39,11 +39,11 @@ const Authentication: React.FC<AuthenticationProps> = ({ staff, onAuthSuccess, o
 
     try {
       // First authenticate the staff member
-      const authResult = await authenticateStaff(staff.UserID, parseInt(pin));
+      const authResult = await authenticateStaff(staff.UserID, pin);
       
       if (authResult) {
         // If authentication successful, perform login to get timelog entry
-        const loginResult = await login(staff.UserID, parseInt(pin));
+        const loginResult = await checkIn(staff.UserID, pin);
         
         if (loginResult) {
           onAuthSuccess(loginResult);
